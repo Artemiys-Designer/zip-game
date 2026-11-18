@@ -106,6 +106,21 @@ const LANGS=['ru','en','de','es'],LNAME={ru:'Русский',en:'English',de:'De
 let LANG='ru';
 try{const l=localStorage.getItem('zip-lang');if(LANGS.includes(l))LANG=l;else{const n=((navigator.language||'en')+'').slice(0,2).toLowerCase();LANG=LANGS.includes(n)?n:'en';}}catch(e){}
 const TR={
+ 'Задание дня':['Daily challenge','Tagesaufgabe','Reto del día'],
+ '📅 Задание дня':['📅 Daily challenge','📅 Tagesaufgabe','📅 Reto del día'],
+ 'Собери {0} сладостей':['Collect {0} sweets','Sammle {0} Süßigkeiten','Recoge {0} dulces'],
+ 'Собери {0} звёзд ⭐':['Collect {0} stars ⭐','Sammle {0} Sterne ⭐','Recoge {0} estrellas ⭐'],
+ 'Подбери {0} бонусов':['Pick up {0} bonuses','Sammle {0} Boni ein','Recoge {0} bonus'],
+ 'Выполни задание и добеги до портала':['Complete the task and reach the portal','Erfülle die Aufgabe und erreiche das Portal','Cumple el reto y llega al portal'],
+ 'Задание дня выполнено! ✨':['Daily challenge complete! ✨','Tagesaufgabe geschafft! ✨','¡Reto del día cumplido! ✨'],
+ '🔥 Серия дней: {0}':['🔥 Day streak: {0}','🔥 Tage in Folge: {0}','🔥 Racha de días: {0}'],
+ 'Рекорд дня: {0}':['Daily best: {0}','Tagesrekord: {0}','Récord del día: {0}'],
+ 'Нажми, чтобы вернуться в меню':['Tap to return to the menu','Tippen, um zum Menü zurückzukehren','Toca para volver al menú'],
+ 'Задание не выполнено':['Challenge not complete','Aufgabe nicht geschafft','Reto sin cumplir'],
+ 'Попробуй ещё раз — уровень тот же!':['Try again: it is the same level!','Versuch es noch einmal: Es ist derselbe Level!','Inténtalo otra vez: ¡es el mismo nivel!'],
+ 'Спокойно':['Easy','Leicht','Fácil'],
+ 'Обычно':['Normal','Normal','Normal'],
+ 'Сложно':['Hard','Schwer','Difícil'],
  'Мармеладия':['Marmeladia','Marmeladia','Mermeladia'],
  'Грибной луг':['Mushroom Meadow','Pilzwiese','Prado de Setas'],
  'Ледяной пудинг':['Icy Pudding','Eispudding','Pudín Helado'],
@@ -331,8 +346,10 @@ function checkAch(){
 const fmtTime=t=>{const m=Math.floor(t/60),q=Math.floor(t%60);return m+':'+String(q).padStart(2,'0');};
 const fmtDate=d=>{try{const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'.'+String(x.getMonth()+1).padStart(2,'0');}catch(e){return '';}};
 let R={candy:0,star:0,bonus:0,hit:0,dj:0},jSel=null,statsT=0,chkT=0,tPlay=0,score0=0;
-function missionDone(i){const m=MISSIONS[i];if(!m)return false;if(m.k==='candy')return R.candy>=m.n;if(m.k==='star')return R.star>=m.n;if(m.k==='bonus')return R.bonus>=m.n;if(m.k==='nohit')return R.hit===0;if(m.k==='nodj')return R.dj===0;return false;}
-function missionProg(i){const m=MISSIONS[i];if(m.k==='candy')return R.candy+'/'+m.n;if(m.k==='star')return R.star+'/'+m.n;if(m.k==='bonus')return R.bonus+'/'+m.n;if(m.k==='nohit')return R.hit===0?'✓':'✗';return R.dj===0?'✓':'✗';}
+function missionDone(i){const m=curM(i);if(!m)return false;if(m.k==='candy')return R.candy>=m.n;if(m.k==='star')return R.star>=m.n;if(m.k==='bonus')return R.bonus>=m.n;if(m.k==='nohit')return R.hit===0;if(m.k==='nodj')return R.dj===0;return false;}
+function missionProg(i){const m=curM(i);if(m.k==='candy')return R.candy+'/'+m.n;if(m.k==='star')return R.star+'/'+m.n;if(m.k==='bonus')return R.bonus+'/'+m.n;if(m.k==='nohit')return R.hit===0?'✓':'✗';return R.dj===0?'✓':'✗';}
+const DIFFS=[{e:'🌱',k:'Спокойно',h:5,sp:.85,roll:false,gap:1.2,sm:.7},{e:'⭐',k:'Обычно',h:3,sp:1,roll:true,gap:1,sm:1},{e:'🔥',k:'Сложно',h:3,sp:1.12,roll:true,gap:.88,sm:1.5}];
+let diff=1;try{const d=parseInt(localStorage.getItem('zip-diff'));if(d>=0&&d<DIFFS.length)diff=d;}catch(e){}
 let musicOn=true,night=false,wonOnce=false;
 try{musicOn=localStorage.getItem('zip-music')!=='0';night=localStorage.getItem('zip-night')==='1';wonOnce=localStorage.getItem('zip-won')==='1';}catch(e){}
 if(!wonOnce)night=false;
@@ -370,13 +387,15 @@ function toggleMusic(){musicOn=!musicOn;try{localStorage.setItem('zip-music',mus
 // ---------- planet setup ----------
 function startPlanet(i,retry){
   if(retry)score=score0;else score0=score;tPlay=0;
+  const _mr=Math.random;
+  if(daily){let a=dailySeed>>>0;Math.random=()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
   pIdx=i;const pl=PLANETS[i];
-  LEN=12500+i*1500;speed=(185+i*10)*(night?1.1:1);dist=0;
+  LEN=12500+i*1500;speed=(185+i*10)*(night?1.1:1)*DIFFS[diff].sp;dist=0;
   objs={obs:[],prizes:[],arts:[],bon:[]};parts=[];toast=null;R={candy:0,star:0,bonus:0,hit:0,dj:0};
-  P={y:GY,vy:0,jumps:0,duck:false,hearts:3,inv:0,run:0,onGround:true,mood:'',moodT:0,magnet:0,shield:false};
+  P={y:GY,vy:0,jumps:0,duck:false,hearts:DIFFS[diff].h,inv:0,run:0,onGround:true,mood:'',moodT:0,magnet:0,shield:false};
   const artX=[.2,.5,.78].map(f=>Math.round(LEN*f));
   const artY=[GY-60,GY-110,GY-130];
-  pl.arts.forEach((a,k)=>{if(!got[i][k])objs.arts.push({k,x:artX[k],y:artY[k],got:false});});
+  if(!daily)pl.arts.forEach((a,k)=>{if(!got[i][k])objs.arts.push({k,x:artX[k],y:artY[k],got:false});});
   let x=900;
   const arc=(cx,span,hh,n)=>{for(let k=0;k<n;k++){const t=k/(n-1);objs.prizes.push({x:cx-span+t*span*2,y:GY-34-Math.sin(t*Math.PI)*hh,got:false,star:k===Math.floor(n/2)&&Math.random()<.3});}};
   while(x<LEN-500){
@@ -385,7 +404,7 @@ function startPlanet(i,retry){
     if(i>=1&&r<.18){
       objs.obs.push({x,w:54,h:30,y:GY-74,by:GY-74,air:true,bob:true});
       for(let k=0;k<4;k++)objs.prizes.push({x:x-30+k*30,y:GY-20,got:false,star:false});
-    }else if(i>=2&&r<.28){
+    }else if(i>=2&&r<.28&&DIFFS[diff].roll){
       objs.obs.push({x:x+200,w:34,h:34,y:GY-34,air:false,roll:true,vx:75+i*6});
     }else if(r<.42){
       const w=rand(72,92),h=rand(30,40);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,w/2+50,h+60,6);
@@ -398,18 +417,36 @@ function startPlanet(i,retry){
     }else{
       const w=rand(34,52),h=rand(34,58);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,70,h+55,5);
     }
-    x+=rand(420,600)*(1-Math.min(i,8)*.025);
+    x+=rand(420,600)*(1-Math.min(i,8)*.025)*DIFFS[diff].gap;
   }
   let bx=1400;
   while(bx<LEN-800){
     if(!artX.some(ax=>Math.abs(ax-bx)<160)&&!objs.obs.some(o=>Math.abs(o.x-bx)<90)){const q=Math.random();objs.bon.push({x:bx,y:GY-rand(55,100),t:q<.4?'magnet':q<.75?'shield':'heart',got:false});}
     bx+=rand(1800,2600);
   }
+  Math.random=_mr;
   startMusic();
   state='intro';introT=2.4;
 }
-function newGame(){got=PLANETS.map(()=>[false,false,false]);score=0;startPlanet(0);}
-function continueGame(){got=saved.got.map(r=>r.slice());score=saved.score||0;startPlanet(Math.min(saved.p,PLANETS.length-1));}
+function newGame(){daily=false;got=PLANETS.map(()=>[false,false,false]);score=0;startPlanet(0);}
+let daily=false,DM=null,dailySeed=0,dd={last:'',streak:0,best:0};
+try{const d=JSON.parse(localStorage.getItem('zip-daily')||'null');if(d){dd.last=String(d.last||'');dd.streak=+d.streak||0;dd.best=+d.best||0;}}catch(e){}
+function saveDaily(){try{localStorage.setItem('zip-daily',JSON.stringify(dd));}catch(e){}}
+const curM=i=>daily?DM:MISSIONS[i];
+const dKey=off=>{const d=new Date();d.setDate(d.getDate()+(off||0));return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();};
+const dHash=n=>{let h=(n^0x9e3779b9)>>>0;h=Math.imul(h^h>>>16,2246822507)>>>0;h=Math.imul(h^h>>>13,3266489909)>>>0;return(h^h>>>16)>>>0;};
+const dailyDone=()=>dd.last===String(dKey(0));
+function dailyMission(k){
+  const h=dHash(k),pi=h%PLANETS.length,kd=['candy','star','bonus','nohit','nodj'][dHash(k+3)%5],q=dHash(k+5);
+  if(kd==='candy'){const n=40+pi*8+q%21;return{k:kd,n,t:f('Собери {0} сладостей',n)};}
+  if(kd==='star'){const n=3+q%3;return{k:kd,n,t:f('Собери {0} звёзд ⭐',n)};}
+  if(kd==='bonus'){const n=2+q%2;return{k:kd,n,t:f('Подбери {0} бонусов',n)};}
+  if(kd==='nohit')return{k:kd,t:tr('Пройди без потери сердечка')};
+  return{k:kd,t:tr('Пройди без двойного прыжка')};
+}
+function startDaily(){const k=dKey(0);daily=true;DM=dailyMission(k);score=0;score0=0;dailySeed=dHash(k+7);startPlanet(dHash(k)%PLANETS.length);}
+function exitDaily(){daily=false;DM=null;state='menu';loadSave();stopMusic();}
+function continueGame(){daily=false;got=saved.got.map(r=>r.slice());score=saved.score||0;startPlanet(Math.min(saved.p,PLANETS.length-1));}
 function planetMissing(i){return got[i].filter(v=>!v).length;}
 function totalGot(){return got.reduce((s,r)=>s+r.filter(Boolean).length,0);}
 
@@ -423,6 +460,8 @@ function onTap(x,y,id){
   if(x>W-56&&((state==='menu'&&y<56)||(state!=='menu'&&y>=50&&y<90))){toggleMusic();beep(520,.08,'triangle',.05);return;}
   if(state==='menu'){
     if(x>=16&&x<=166&&y>=12&&y<=46){state='journal';jSel=null;beep(600,.08,'triangle',.05);return;}
+    if(x>=572&&x<=788&&y>=388&&y<=424){startDaily();beep(700,.08,'triangle',.05);return;}
+    if(x>=484&&x<=620&&y>=12&&y<=46){diff=(diff+1)%DIFFS.length;try{localStorage.setItem('zip-diff',String(diff));}catch(e){}beep(600+diff*120,.08,'triangle',.05);return;}
     if(x>=626&&x<=738&&y>=12&&y<=46){nextLang();beep(660,.08,'triangle',.05);return;}
     if(x>=172&&x<=322&&y>=12&&y<=46){state='ach';beep(600,.08,'triangle',.05);return;}
     if(x>=328&&x<=478&&y>=12&&y<=46){state='rec';beep(600,.08,'triangle',.05);return;}
@@ -431,10 +470,11 @@ function onTap(x,y,id){
     for(const b of menuBtns())if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){if(b.a==='cont')continueGame();else{clearSave();newGame();}return;}
   }else if(state==='intro'){introT=0;}
   else if(state==='play'){if(x<W*.6)doJump();else{touchDuck=true;duckPtr=id;}}
+  else if(state==='end'&&endInfo.daily){if(endInfo.ok||(x<150&&y<56))exitDaily();else startPlanet(pIdx,true);}
   else if(state==='end'){
-    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}stats.wins++;rec.runs.push({s:score,d:Date.now(),n:night?1:0});rec.runs.sort((a,b)=>b.s-a.s);rec.runs=rec.runs.slice(0,10);saveMeta();checkAch();}else{pIdx++;score0=score;save();startPlanet(pIdx);}}
+    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}stats.wins++;rec.runs.push({s:score,d:Date.now(),n:night?1:0,f:diff});rec.runs.sort((a,b)=>b.s-a.s);rec.runs=rec.runs.slice(0,10);saveMeta();checkAch();}else{pIdx++;score0=score;save();startPlanet(pIdx);}}
     else startPlanet(pIdx,true);
-  }else if(state==='dead'){startPlanet(pIdx,true);}
+  }else if(state==='dead'){if(daily&&x<150&&y<56)exitDaily();else startPlanet(pIdx,true);}
   else if(state==='win'){state='menu';loadSave();stopMusic();}
   else if(state==='ach'||state==='rec'){if(x<150&&y<56)state='menu';}
   else if(state==='journal'){
@@ -496,7 +536,7 @@ function update(dt){
   }
   for(const p of objs.prizes){
     if(p.got)continue;const sx=p.x-dist;if(sx<-40||sx>W+40)continue;
-    if(Math.hypot(sx-cx,p.y-cy)<30){p.got=true;R.candy++;stats.candy++;if(p.star){R.star++;stats.star++;}score+=p.star?50:10;sPrize();burst(sx,p.y,p.star?'#fff27a':'#ffd24a',6);if(P.moodT<.4){P.mood='happy';P.moodT=.5;}}
+    if(Math.hypot(sx-cx,p.y-cy)<30){p.got=true;R.candy++;stats.candy++;if(p.star){R.star++;stats.star++;}score+=Math.round((p.star?50:10)*DIFFS[diff].sm);sPrize();burst(sx,p.y,p.star?'#fff27a':'#ffd24a',6);if(P.moodT<.4){P.mood='happy';P.moodT=.5;}}
   }
   for(const a of objs.arts){
     if(a.got)continue;const sx=a.x-dist;if(sx<-60||sx>W+60)continue;
@@ -506,13 +546,20 @@ function update(dt){
     }
   }
   if(dist+PX>=LEN){
+    if(daily){
+      const md=missionDone(0);endInfo={ok:md,daily:true,md,miss:0};state='end';
+      if(md){sWin();const b=Math.round((300+100*P.hearts)*DIFFS[diff].sm);endInfo.bonus=b;score+=b;
+        const key=String(dKey(0));if(dd.last!==key){dd.streak=(dd.last===String(dKey(-1)))?dd.streak+1:1;dd.last=key;}
+        endInfo.streak=dd.streak;if(score>dd.best)dd.best=score;saveDaily();}
+      return;
+    }
     const miss=planetMissing(pIdx);
     const md=missionDone(pIdx);
     endInfo={ok:miss===0,miss,md,relicNew:false};state='end';
     if(md&&!book.r[pIdx]){book.r[pIdx]=true;saveBook();endInfo.relicNew=true;}
     if(miss===0){sWin();const o=OUTMAP[pIdx];if(o!==undefined&&!ward.u.includes(o)){ward.u.push(o);ward.sel=o;saveWard();endInfo.newOutfit=OUT[o].n;}
       stats.planets++;if(R.hit===0)stats.clean=true;if(night)stats.night=true;
-      const bonus=200+100*P.hearts+(md?300:0);score+=bonus;endInfo.bonus=bonus;
+      const bonus=Math.round((200+100*P.hearts+(md?300:0))*DIFFS[diff].sm);score+=bonus;endInfo.bonus=bonus;
       const ps=score-score0;if(ps>rec.bs[pIdx])rec.bs[pIdx]=ps;
       const tm=Math.round(tPlay*10)/10;if(!rec.bt[pIdx]||tm<rec.bt[pIdx])rec.bt[pIdx]=tm;
       save();}
@@ -806,16 +853,16 @@ function drawHUD(){
   panel(W/2-110,10,220,36,18);
   txt('✨ '+score+'   · '+PLANETS[pIdx].name+(night?' 🌙':''),W/2,29,15,'#fff');
   panel(W-190,10,180,36,18);
-  PLANETS[pIdx].arts.forEach((a,k)=>{ctx.globalAlpha=got[pIdx][k]?1:.3;txt(a.e,W-160+k*52,29,22);});
+  if(!daily)PLANETS[pIdx].arts.forEach((a,k)=>{ctx.globalAlpha=got[pIdx][k]?1:.3;txt(a.e,W-160+k*52,29,22);});
   ctx.globalAlpha=1;
   const prog=Math.min(1,(dist+PX)/LEN);
   ctx.fillStyle='rgba(20,10,45,.6)';rr(W/2-150,54,300,8,4);ctx.fill();
   ctx.fillStyle='#ffe66b';rr(W/2-150,54,300*prog,8,4);ctx.fill();
-  txt(f('Улики: {0}/{1}',totalGot(),TOTAL),70,62,13,'#fff','center');
+  if(!daily)txt(f('Улики: {0}/{1}',totalGot(),TOTAL),70,62,13,'#fff','center');
   if(P.magnet>0)txt('🧲 '+Math.ceil(P.magnet)+tr('с'),190,62,13,'#ffd1f0');
   if(P.shield)txt('🛡️',250,62,15);
   txt(musicOn?'🔊':'🔇',W-26,70,18);
-  {const mm=MISSIONS[pIdx],tx='🎯 '+mm.t+': '+missionProg(pIdx);ctx.font='bold 12px system-ui';const tw=ctx.measureText(tx).width;panel(8,H-34,tw+24,24,12,'rgba(20,10,45,.7)');txt(tx,20,H-22,12,'#fff','left');}
+  {const mm=curM(pIdx),tx='🎯 '+mm.t+': '+missionProg(pIdx);ctx.font='bold 12px system-ui';const tw=ctx.measureText(tx).width;panel(8,H-34,tw+24,24,12,'rgba(20,10,45,.7)');txt(tx,20,H-22,12,'#fff','left');}
   if(toast){
     const a=Math.min(1,toast.t*2);ctx.globalAlpha=a;
     panel(W/2-250,76,500,64,16,'rgba(40,20,80,.9)');
@@ -891,7 +938,7 @@ function drawRec(){
     const y=96+i*30,r=rec.runs[i];
     panel(18,y-13,360,26,10,'rgba(255,255,255,'+(r?0.1:0.04)+')');
     txt((i+1)+'.',34,y,14,i<3?'#ffe66b':'#fff','left');
-    if(r){txt(f('{0} очков',r.s),70,y,14,'#fff','left');txt(tr(r.n?'🌙 ночь':'☀️ день')+' · '+fmtDate(r.d),366,y,12,'#cfe8ff','right','normal');}
+    if(r){txt(f('{0} очков',r.s),70,y,14,'#fff','left');txt(DIFFS[r.f===undefined?1:r.f].e+' '+tr(r.n?'🌙 ночь':'☀️ день')+' · '+fmtDate(r.d),366,y,12,'#cfe8ff','right','normal');}
     else txt('—',70,y,14,'rgba(255,255,255,.3)','left');
   }
   txt(tr('Лучшее на каждой планете'),596,66,14,'#9fe8ff');
@@ -925,13 +972,14 @@ function draw(){
   if(state==='menu'){
     pIdx=0;drawBG(PLANETS[0]);
     for(let i=0;i<9;i++){ctx.fillStyle=['#7fb0ff','#3fbf9f','#bfe9ff','#ffb347','#ffffff','#35d6c4','#d9a441','#ff7a30','#8a6bff'][i];ctx.beginPath();ctx.arc(70+i*82,95+Math.sin(time*1.5+i)*8,11+i%2*5,0,7);ctx.fill();}
-    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('📖 Дневник'),91,29,14,'#fff');panel(172,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏆 Достижения'),247,29,14,'#fff');panel(328,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏁 Рекорды'),403,29,14,'#fff');panel(626,12,112,34,17,'rgba(255,255,255,.2)');txt('🌐 '+LNAME[LANG],682,29,13,'#fff');
+    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('📖 Дневник'),91,29,14,'#fff');panel(172,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏆 Достижения'),247,29,14,'#fff');panel(328,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏁 Рекорды'),403,29,14,'#fff');panel(484,12,136,34,17,'rgba(255,255,255,.2)');txt(DIFFS[diff].e+' '+tr(DIFFS[diff].k),552,29,14,'#fff');panel(626,12,112,34,17,'rgba(255,255,255,.2)');txt('🌐 '+LNAME[LANG],682,29,13,'#fff');
     txt(tr('Зип: путь домой'),W/2,150,46,'#fff');
     txt(tr('Cozy mystery · кто украл звёздный ключ?'),W/2,196,18,'#ffe9b0','center','normal');
     txt(tr('Собери все артефакты на девяти планетах — и лети домой'),W/2,228,15,'#fff','center','normal');
     const bs=menuBtns();
     if(saved){btn(bs[0],f('Продолжить · планета {0}',saved.p+1),true);btn(bs[1],tr('Новая игра'),false);}
     else btn(bs[0],tr('Играть'),true);
+    {const b={x:572,y:388,w:216,h:36},dn=dailyDone();ctx.fillStyle=dn?'rgba(255,255,255,.18)':'#ffcf4a';rr(b.x,b.y,b.w,b.h,18);ctx.fill();txt('📅 '+tr('Задание дня')+(dd.streak&&(dn||dd.last===String(dKey(-1)))?' 🔥'+dd.streak:'')+(dn?' ✓':''),b.x+b.w/2,b.y+18,14,dn?'#fff':'#3a2060');}
     if(wonOnce)btn({x:240,y:388,w:320,h:36},f('🌙 Ночной режим: {0}',tr(night?'ВКЛ':'выкл')),night);
     txt(musicOn?'🔊':'🔇',W-28,28,22);
     dist+=1.5;drawWeather(PLANETS[0]);txt(f('Наряд: {0} · нажми на Зипа ({1}/{2})',OUT[ward.sel].n,ward.u.length,OUT.length),200,436,13,'#fff','center','normal');drawAlien(W/2-200,GY,false,0,time*6);
@@ -973,15 +1021,20 @@ function draw(){
   if(state!=='intro')drawHUD();
   if(state==='intro'){
     ctx.fillStyle='rgba(10,5,30,.55)';ctx.fillRect(0,0,W,H);
-    txt(f('Планета {0} из {1}',pIdx+1,PLANETS.length),W/2,160,18,'#9fe8ff');
+    txt(daily?tr('📅 Задание дня'):f('Планета {0} из {1}',pIdx+1,PLANETS.length),W/2,160,18,'#9fe8ff');
     txt(pl.name,W/2,205,44,'#fff');
     const miss=planetMissing(pIdx);
-    txt(miss===3?tr('Найди 3 артефакта и добеги до портала'):f('Осталось найти артефактов: {0}',miss),W/2,255,18,'#ffe9b0','center','normal');
-    txt(f('🎯 Миссия: {0}',MISSIONS[pIdx].t),W/2,290,17,'#9fe8ff','center','normal');
+    txt(daily?tr('Выполни задание и добеги до портала'):miss===3?tr('Найди 3 артефакта и добеги до портала'):f('Осталось найти артефактов: {0}',miss),W/2,255,18,'#ffe9b0','center','normal');
+    txt(f('🎯 Миссия: {0}',curM(pIdx).t),W/2,290,17,'#9fe8ff','center','normal');
     txt(tr('Нажми, чтобы начать'),W/2,328,14,'rgba(255,255,255,.7)','center','normal');
   }
-  if(state==='dead')overlay(tr('Ой! Сердечки закончились'),[tr('Не беда — найденные артефакты остались с тобой.'),tr('Попробуем планету ещё раз?')],tr('Нажми, чтобы повторить'));
-  if(state==='end'){
+  if(state==='dead')overlay(tr('Ой! Сердечки закончились'),daily?[tr('Попробуй ещё раз — уровень тот же!')]:[tr('Не беда — найденные артефакты остались с тобой.'),tr('Попробуем планету ещё раз?')],tr('Нажми, чтобы повторить'));
+  if(state==='end'&&endInfo.daily){
+    if(endInfo.ok)overlay(tr('Задание дня выполнено! ✨'),[f('🔥 Серия дней: {0}',endInfo.streak),f('Бонус +{0} · Счёт: {1}',endInfo.bonus,score),f('Рекорд дня: {0}',dd.best)],tr('Нажми, чтобы вернуться в меню'),'#ffe66b');
+    else overlay(tr('Задание не выполнено'),[f('🎯 Миссия не выполнена: {0}',DM.t),tr('Попробуй ещё раз — уровень тот же!')],tr('Нажми, чтобы попробовать снова'),'#ff9aa8');
+  }
+  if(daily&&(state==='dead'||(state==='end'&&!endInfo.ok))){panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt(tr('← Назад'),71,27,14);}
+  if(state==='end'&&!endInfo.daily){
     const mm=MISSIONS[pIdx],rl=RELICS[pIdx];
     const mLine=endInfo.md?(endInfo.relicNew?f('🏅 Миссия выполнена! Реликвия: {0} {1}',rl.e,rl.n):tr('🏅 Миссия выполнена (реликвия уже в дневнике)')):f('🎯 Миссия не выполнена: {0}',mm.t);
     if(endInfo.ok)overlay(tr('Планета пройдена! ✨'),[tr('Все артефакты здесь собраны.'),endInfo.newOutfit?f('Новый наряд для Зипа: «{0}»! 🎉',endInfo.newOutfit):tr('Портал открывается — летим дальше.'),mLine,f('Бонус +{0} · Счёт: {1}',endInfo.bonus,score)],pIdx+1>=PLANETS.length?tr('Нажми — лететь домой!'):tr('Нажми — следующая планета'),'#ffe66b');
@@ -996,7 +1049,7 @@ function frame(ts){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__dbg={get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
+window.__dbg={startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});}</script>
