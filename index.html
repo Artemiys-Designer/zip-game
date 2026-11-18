@@ -61,10 +61,10 @@ for(let i=0;i<60;i++)stars.push({x:Math.random()*W,y:Math.random()*260,r:Math.ra
 
 // ---------- save ----------
 function loadSave(){try{const s=JSON.parse(localStorage.getItem('zip-mystery')||'null');if(s&&Array.isArray(s.got)&&s.got.length===PLANETS.length)saved=s;}catch(e){}}
-function save(){try{localStorage.setItem('zip-mystery',JSON.stringify({p:pIdx,got}));}catch(e){}}
+function save(){try{localStorage.setItem('zip-mystery',JSON.stringify({p:pIdx,got,score:score0}));}catch(e){}}
 function clearSave(){saved=null;try{localStorage.removeItem('zip-mystery');}catch(e){}}
 loadSave();
-const OUT=[{n:'Сыщик',sc:'#e8556b'},{n:'Кондитер',sc:'#ff8fc7'},{n:'Грибник',sc:'#7bd45a'},{n:'Полярник',sc:'#ffffff'},{n:'Путник',sc:'#ff9a3c'},{n:'Звездочёт',sc:'#ffd24a'},{n:'Лётчик',sc:'#9fe8ff'},{n:'Ныряльщик',sc:'#4fd0ff'},{n:'Механик',sc:'#d9a441'},{n:'Огнеборец',sc:'#ffd24a'}];
+const OUT=[{n:'Сыщик',sc:'#e8556b'},{n:'Кондитер',sc:'#ff8fc7'},{n:'Грибник',sc:'#7bd45a'},{n:'Полярник',sc:'#ffffff'},{n:'Путник',sc:'#ff9a3c'},{n:'Звездочёт',sc:'#ffd24a'},{n:'Лётчик',sc:'#9fe8ff'},{n:'Ныряльщик',sc:'#4fd0ff'},{n:'Механик',sc:'#d9a441'},{n:'Огнеборец',sc:'#ffd24a'},{n:'Пират',sc:'#e8e0c8'},{n:'Космонавт',sc:'#ffffff'},{n:'Ковбой',sc:'#c0392b'},{n:'Король',sc:'#7a3fc0'},{n:'Котик',sc:'#ff9f4a'},{n:'Нинджа',sc:'#d02f2f'}];
 let ward={u:[0],sel:0};
 function loadWard(){try{const w=JSON.parse(localStorage.getItem('zip-ward')||'null');if(w&&Array.isArray(w.u)){ward.u=w.u.filter(n=>Number.isInteger(n)&&n>=0&&n<OUT.length);if(!ward.u.includes(0))ward.u.unshift(0);ward.sel=ward.u.includes(w.sel)?w.sel:0;}}catch(e){}}
 function saveWard(){try{localStorage.setItem('zip-ward',JSON.stringify(ward));}catch(e){}}
@@ -73,7 +73,49 @@ let book={a:PLANETS.map(()=>[false,false,false]),r:PLANETS.map(()=>false)};
 function loadBook(){try{const b=JSON.parse(localStorage.getItem('zip-book')||'null');if(b&&Array.isArray(b.a)&&Array.isArray(b.r)){b.a.forEach((row,i)=>{if(book.a[i]&&Array.isArray(row))row.forEach((v,k)=>{if(k<3)book.a[i][k]=!!v;});});b.r.forEach((v,i)=>{if(i<book.r.length)book.r[i]=!!v;});}}catch(e){}}
 function saveBook(){try{localStorage.setItem('zip-book',JSON.stringify(book));}catch(e){}}
 loadBook();
-let R={candy:0,star:0,bonus:0,hit:0,dj:0},jSel=null;
+let stats={candy:0,star:0,jumps:0,dj:0,bonus:0,shield:0,planets:0,clean:false,night:false,wins:0};
+let achU={};
+let rec={runs:[],bs:PLANETS.map(()=>0),bt:PLANETS.map(()=>0)};
+function loadMeta(){
+  try{const a=JSON.parse(localStorage.getItem('zip-ach')||'null');if(a){if(a.u&&typeof a.u==='object')achU=a.u;if(a.st)Object.keys(stats).forEach(k=>{if(a.st[k]!==undefined)stats[k]=a.st[k];});}}catch(e){}
+  try{const r=JSON.parse(localStorage.getItem('zip-rec')||'null');if(r){if(Array.isArray(r.runs))rec.runs=r.runs.slice(0,10);if(Array.isArray(r.bs))r.bs.forEach((v,i)=>{if(i<rec.bs.length)rec.bs[i]=+v||0;});if(Array.isArray(r.bt))r.bt.forEach((v,i)=>{if(i<rec.bt.length)rec.bt[i]=+v||0;});}}catch(e){}
+}
+function saveMeta(){try{localStorage.setItem('zip-ach',JSON.stringify({u:achU,st:stats}));localStorage.setItem('zip-rec',JSON.stringify(rec));}catch(e){}}
+loadMeta();
+const cntA=()=>book.a.reduce((q,r)=>q+r.filter(Boolean).length,0),cntR=()=>book.r.filter(Boolean).length;
+const ACH=[
+ {id:'first',e:'🚀',n:'Первая планета',d:'Пройди первую планету',t:()=>stats.planets>=1},
+ {id:'candy',e:'🍬',n:'Сладкоежка',d:'Собери 500 сладостей',t:()=>stats.candy>=500,p:()=>Math.min(stats.candy,500)+'/500',o:10},
+ {id:'stars',e:'⭐',n:'Звёздный дождь',d:'Собери 25 звёзд',t:()=>stats.star>=25,p:()=>Math.min(stats.star,25)+'/25'},
+ {id:'coll',e:'🔎',n:'Коллекционер',d:'Найди 10 артефактов',t:()=>cntA()>=10,p:()=>Math.min(cntA(),10)+'/10'},
+ {id:'all',e:'🕵️',n:'Следопыт',d:'Найди все артефакты',t:()=>cntA()>=TOTAL,p:()=>cntA()+'/'+TOTAL,o:13},
+ {id:'mis5',e:'🎯',n:'Мастер миссий',d:'Выполни 5 миссий',t:()=>cntR()>=5,p:()=>Math.min(cntR(),5)+'/5'},
+ {id:'mis9',e:'🏅',n:'Все реликвии',d:'Выполни все миссии',t:()=>cntR()>=PLANETS.length,p:()=>cntR()+'/'+PLANETS.length},
+ {id:'clean',e:'🛡️',n:'Без царапин',d:'Пройди планету без потери сердечка',t:()=>stats.clean,o:12},
+ {id:'jumps',e:'🦘',n:'Прыгун',d:'Соверши 300 прыжков',t:()=>stats.jumps>=300,p:()=>Math.min(stats.jumps,300)+'/300',o:14},
+ {id:'dj',e:'🌀',n:'Воздушный акробат',d:'Сделай 50 двойных прыжков',t:()=>stats.dj>=50,p:()=>Math.min(stats.dj,50)+'/50'},
+ {id:'bonus',e:'🧲',n:'Любитель бонусов',d:'Подбери 10 бонусов',t:()=>stats.bonus>=10,p:()=>Math.min(stats.bonus,10)+'/10'},
+ {id:'shield',e:'🔰',n:'Щит выручил',d:'Прими на щит 5 ударов',t:()=>stats.shield>=5,p:()=>Math.min(stats.shield,5)+'/5'},
+ {id:'night',e:'🌙',n:'Ночной сыщик',d:'Пройди планету в ночном режиме',t:()=>stats.night,o:15},
+ {id:'home',e:'🏡',n:'Домой!',d:'Пройди всю игру',t:()=>stats.wins>=1,o:11},
+ {id:'mod',e:'👒',n:'Модник',d:'Открой 8 нарядов',t:()=>ward.u.length>=8,p:()=>Math.min(ward.u.length,8)+'/8'},
+ {id:'ward',e:'👑',n:'Гардероб',d:'Открой все наряды',t:()=>ward.u.length>=OUT.length,p:()=>ward.u.length+'/'+OUT.length}
+];
+let aQ=[],aToast=null;
+function checkAch(){
+  let ch=false;
+  for(const a of ACH){
+    if(achU[a.id])continue;
+    let ok=false;try{ok=a.t();}catch(e){}
+    if(ok){achU[a.id]=true;ch=true;let x='';
+      if(a.o!==undefined&&!ward.u.includes(a.o)){ward.u.push(a.o);saveWard();x=' · наряд «'+OUT[a.o].n+'»';}
+      aQ.push({e:a.e,n:a.n,x});}
+  }
+  if(ch){saveMeta();checkAch();}
+}
+const fmtTime=t=>{const m=Math.floor(t/60),q=Math.floor(t%60);return m+':'+String(q).padStart(2,'0');};
+const fmtDate=d=>{try{const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'.'+String(x.getMonth()+1).padStart(2,'0');}catch(e){return '';}};
+let R={candy:0,star:0,bonus:0,hit:0,dj:0},jSel=null,statsT=0,chkT=0,tPlay=0,score0=0;
 function missionDone(i){const m=MISSIONS[i];if(!m)return false;if(m.k==='candy')return R.candy>=m.n;if(m.k==='star')return R.star>=m.n;if(m.k==='bonus')return R.bonus>=m.n;if(m.k==='nohit')return R.hit===0;if(m.k==='nodj')return R.dj===0;return false;}
 function missionProg(i){const m=MISSIONS[i];if(m.k==='candy')return R.candy+'/'+m.n;if(m.k==='star')return R.star+'/'+m.n;if(m.k==='bonus')return R.bonus+'/'+m.n;if(m.k==='nohit')return R.hit===0?'✓':'✗';return R.dj===0?'✓':'✗';}
 let musicOn=true,night=false,wonOnce=false;
@@ -111,9 +153,10 @@ function startMusic(){
 function toggleMusic(){musicOn=!musicOn;try{localStorage.setItem('zip-music',musicOn?'1':'0');}catch(e){}if(musicOn&&state!=='menu'&&state!=='win')startMusic();else stopMusic();}
 
 // ---------- planet setup ----------
-function startPlanet(i){
+function startPlanet(i,retry){
+  if(retry)score=score0;else score0=score;tPlay=0;
   pIdx=i;const pl=PLANETS[i];
-  LEN=15000+i*1900;speed=(255+i*15)*(night?1.15:1);dist=0;
+  LEN=14000+i*1700;speed=(215+i*12)*(night?1.15:1);dist=0;
   objs={obs:[],prizes:[],arts:[],bon:[]};parts=[];toast=null;R={candy:0,star:0,bonus:0,hit:0,dj:0};
   P={y:GY,vy:0,jumps:0,duck:false,hearts:3,inv:0,run:0,onGround:true,mood:'',moodT:0,magnet:0,shield:false};
   const artX=[.2,.5,.78].map(f=>Math.round(LEN*f));
@@ -128,13 +171,13 @@ function startPlanet(i){
       objs.obs.push({x,w:54,h:30,y:GY-74,by:GY-74,air:true,bob:true});
       for(let k=0;k<4;k++)objs.prizes.push({x:x-30+k*30,y:GY-20,got:false,star:false});
     }else if(i>=2&&r<.28){
-      objs.obs.push({x:x+200,w:34,h:34,y:GY-34,air:false,roll:true,vx:110+i*10});
+      objs.obs.push({x:x+200,w:34,h:34,y:GY-34,air:false,roll:true,vx:90+i*8});
     }else if(r<.42){
-      const w=rand(90,120),h=rand(30,40);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,w/2+50,h+60,6);
+      const w=rand(80,105),h=rand(30,40);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,w/2+50,h+60,6);
     }else if(r<.56){
       const w=rand(28,36),h=rand(70,88);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,60,h+60,5);
     }else if(r<.72){
-      const w1=rand(28,34),h1=rand(30,40),w2=rand(28,34),h2=rand(30,40),gap=rand(45,56);
+      const w1=rand(28,32),h1=rand(30,40),w2=rand(28,32),h2=rand(30,40),gap=rand(38,46);
       objs.obs.push({x,w:w1,h:h1,y:GY-h1,air:false});objs.obs.push({x:x+w1+gap,w:w2,h:h2,y:GY-h2,air:false});
       arc(x+(w1+gap+w2)/2,(w1+gap+w2)/2+40,Math.max(h1,h2)+65,7);x+=w1+gap+w2;
     }else{
@@ -151,30 +194,33 @@ function startPlanet(i){
   state='intro';introT=2.4;
 }
 function newGame(){got=PLANETS.map(()=>[false,false,false]);score=0;startPlanet(0);}
-function continueGame(){got=saved.got.map(r=>r.slice());startPlanet(Math.min(saved.p,PLANETS.length-1));}
+function continueGame(){got=saved.got.map(r=>r.slice());score=saved.score||0;startPlanet(Math.min(saved.p,PLANETS.length-1));}
 function planetMissing(i){return got[i].filter(v=>!v).length;}
 function totalGot(){return got.reduce((s,r)=>s+r.filter(Boolean).length,0);}
 
 // ---------- input ----------
 function doJump(){
   if(state!=='play')return;
-  if(P.jumps<2){P.vy=P.jumps===0?-700:-620;P.jumps++;P.onGround=false;sJump();if(P.jumps===2){R.dj++;burst(PX,P.y-4,'#9fe8ff',12);}}
+  if(P.jumps<2){P.vy=P.jumps===0?-650:-580;P.jumps++;stats.jumps++;P.onGround=false;sJump();if(P.jumps===2){R.dj++;stats.dj++;burst(PX,P.y-4,'#9fe8ff',12);}}
 }
 function menuBtns(){return saved?[{x:240,y:268,w:320,h:50,a:'cont'},{x:240,y:330,w:320,h:50,a:'new'}]:[{x:240,y:285,w:320,h:58,a:'new'}];}
 function onTap(x,y,id){
   if(x>W-56&&((state==='menu'&&y<56)||(state!=='menu'&&y>=50&&y<90))){toggleMusic();beep(520,.08,'triangle',.05);return;}
   if(state==='menu'){
     if(x>=16&&x<=166&&y>=12&&y<=46){state='journal';jSel=null;beep(600,.08,'triangle',.05);return;}
+    if(x>=172&&x<=322&&y>=12&&y<=46){state='ach';beep(600,.08,'triangle',.05);return;}
+    if(x>=328&&x<=478&&y>=12&&y<=46){state='rec';beep(600,.08,'triangle',.05);return;}
     if(wonOnce&&x>=240&&x<=560&&y>=388&&y<=424){night=!night;try{localStorage.setItem('zip-night',night?'1':'0');}catch(e){}beep(night?330:520,.12,'triangle',.06);return;}
     if(x>=120&&x<=235&&y>=250){const u=ward.u;ward.sel=u[(u.indexOf(ward.sel)+1)%u.length];saveWard();beep(660,.1,'triangle',.06);return;}
     for(const b of menuBtns())if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){if(b.a==='cont')continueGame();else{clearSave();newGame();}return;}
   }else if(state==='intro'){introT=0;}
   else if(state==='play'){if(x<W*.6)doJump();else{touchDuck=true;duckPtr=id;}}
   else if(state==='end'){
-    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}}else{pIdx++;save();startPlanet(pIdx);}}
-    else startPlanet(pIdx);
-  }else if(state==='dead'){startPlanet(pIdx);}
+    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}stats.wins++;rec.runs.push({s:score,d:Date.now(),n:night?1:0});rec.runs.sort((a,b)=>b.s-a.s);rec.runs=rec.runs.slice(0,10);saveMeta();checkAch();}else{pIdx++;score0=score;save();startPlanet(pIdx);}}
+    else startPlanet(pIdx,true);
+  }else if(state==='dead'){startPlanet(pIdx,true);}
   else if(state==='win'){state='menu';loadSave();stopMusic();}
+  else if(state==='ach'||state==='rec'){if(x<150&&y<56)state='menu';}
   else if(state==='journal'){
     if(x<150&&y<56){state='menu';return;}
     for(let r=0;r<PLANETS.length;r++)for(let k=0;k<4;k++){if(Math.hypot(x-(250+k*64),y-(84+r*35))<22){jSel={r,k};return;}}
@@ -200,15 +246,19 @@ function update(dt){
   time+=dt;
   parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=400*dt;p.l-=dt;});parts=parts.filter(p=>p.l>0);
   if(toast){toast.t-=dt;if(toast.t<=0)toast=null;}
+  if(aToast){aToast.t-=dt;if(aToast.t<=0)aToast=null;}
+  if(!aToast&&aQ.length){aToast=aQ.shift();aToast.t=3.6;sArt();}
+  chkT+=dt;if(chkT>.5){chkT=0;checkAch();}
+  statsT+=dt;if(statsT>6){statsT=0;saveMeta();}
   if(state==='intro'){introT-=dt;if(introT<=0)state='play';return;}
   if(state!=='play')return;
-  dist+=speed*dt;
+  dist+=speed*dt;tPlay+=dt;
   for(const o of objs.obs){if(o.vx)o.x-=o.vx*dt;if(o.bob)o.y=o.by+Math.sin(time*3+o.x*.01)*8;}
   P.run+=dt*speed/38;
   if(P.inv>0)P.inv-=dt;if(P.moodT>0)P.moodT-=dt;
   const wantDuck=keyDuck||touchDuck;
   P.duck=wantDuck&&P.onGround;
-  P.vy+=1900*dt;P.y+=P.vy*dt;
+  P.vy+=1600*dt;P.y+=P.vy*dt;
   if(P.y>=GY){P.y=GY;P.vy=0;P.onGround=true;P.jumps=0;}
   const bh=P.duck?28:52;
   const hb={x:PX-13,y:P.y-bh+4,w:26,h:bh-6};
@@ -216,7 +266,7 @@ function update(dt){
     const sx=o.x-dist;if(sx>PX+80||sx<-120)continue;
     if(P.inv>0)continue;
     if(hb.x<sx+o.w-4&&hb.x+hb.w>sx+4&&hb.y<o.y+o.h-3&&hb.y+hb.h>o.y+3){
-      if(P.shield){P.shield=false;P.inv=1;beep(300,.25,'triangle',.07,900);burst(PX,P.y-24,'#9fe8ff',20);continue;}
+      if(P.shield){P.shield=false;stats.shield++;P.inv=1;beep(300,.25,'triangle',.07,900);burst(PX,P.y-24,'#9fe8ff',20);continue;}
       P.hearts--;R.hit++;P.inv=1.5;sHit();P.mood='ouch';P.moodT=1.2;burst(PX,P.y-24,'#ff6b8a',14);
       if(P.hearts<=0){state='dead';return;}
     }
@@ -225,12 +275,12 @@ function update(dt){
   if(P.magnet>0){P.magnet-=dt;for(const p of objs.prizes){if(p.got)continue;const sx=p.x-dist;if(Math.abs(sx-cx)<230&&Math.abs(p.y-cy)<230){const k=Math.min(1,dt*7);p.x+=(cx+dist-p.x)*k;p.y+=(cy-p.y)*k;}}}
   for(const b of objs.bon){
     if(b.got)continue;const sx=b.x-dist;if(sx<-50||sx>W+50)continue;
-    if(Math.hypot(sx-cx,b.y-cy)<36){b.got=true;R.bonus++;sBonus();burst(sx,b.y,'#9fe8ff',16);P.mood='happy';P.moodT=.8;
+    if(Math.hypot(sx-cx,b.y-cy)<36){b.got=true;R.bonus++;stats.bonus++;sBonus();burst(sx,b.y,'#9fe8ff',16);P.mood='happy';P.moodT=.8;
       if(b.t==='magnet')P.magnet=9;else if(b.t==='shield')P.shield=true;else P.hearts=Math.min(5,P.hearts+1);}
   }
   for(const p of objs.prizes){
     if(p.got)continue;const sx=p.x-dist;if(sx<-40||sx>W+40)continue;
-    if(Math.hypot(sx-cx,p.y-cy)<30){p.got=true;R.candy++;if(p.star)R.star++;score+=p.star?50:10;sPrize();burst(sx,p.y,p.star?'#fff27a':'#ffd24a',6);if(P.moodT<.4){P.mood='happy';P.moodT=.5;}}
+    if(Math.hypot(sx-cx,p.y-cy)<30){p.got=true;R.candy++;stats.candy++;if(p.star){R.star++;stats.star++;}score+=p.star?50:10;sPrize();burst(sx,p.y,p.star?'#fff27a':'#ffd24a',6);if(P.moodT<.4){P.mood='happy';P.moodT=.5;}}
   }
   for(const a of objs.arts){
     if(a.got)continue;const sx=a.x-dist;if(sx<-60||sx>W+60)continue;
@@ -244,7 +294,13 @@ function update(dt){
     const md=missionDone(pIdx);
     endInfo={ok:miss===0,miss,md,relicNew:false};state='end';
     if(md&&!book.r[pIdx]){book.r[pIdx]=true;saveBook();endInfo.relicNew=true;}
-    if(miss===0){sWin();const o=OUTMAP[pIdx];if(o!==undefined&&!ward.u.includes(o)){ward.u.push(o);ward.sel=o;saveWard();endInfo.newOutfit=OUT[o].n;}}
+    if(miss===0){sWin();const o=OUTMAP[pIdx];if(o!==undefined&&!ward.u.includes(o)){ward.u.push(o);ward.sel=o;saveWard();endInfo.newOutfit=OUT[o].n;}
+      stats.planets++;if(R.hit===0)stats.clean=true;if(night)stats.night=true;
+      const bonus=200+100*P.hearts+(md?300:0);score+=bonus;endInfo.bonus=bonus;
+      const ps=score-score0;if(ps>rec.bs[pIdx])rec.bs[pIdx]=ps;
+      const tm=Math.round(tPlay*10)/10;if(!rec.bt[pIdx]||tm<rec.bt[pIdx])rec.bt[pIdx]=tm;
+      save();}
+    saveMeta();checkAch();
   }
 }
 
@@ -449,7 +505,7 @@ function drawAlien(x,feet,duck,inv,run){
   else if(mood==='ouch'){ctx.beginPath();ctx.moveTo(-4,-36-bob);ctx.quadraticCurveTo(0,-40-bob,5,-36-bob);ctx.stroke();}
   else if(air){ctx.fillStyle='#35523f';ctx.beginPath();ctx.ellipse(1,-37-bob,2.8,3.4,0,0,7);ctx.fill();}
   else{ctx.beginPath();ctx.arc(1,-39-bob,4.6,.25,Math.PI-.25);ctx.stroke();}
-  const side=ward.sel===1||ward.sel===5||ward.sel===8,aw=Math.sin(time*5)*3;
+  const side=[1,5,8,13,14].includes(ward.sel),aw=Math.sin(time*5)*3;
   const ant=()=>{const bx=side?15:9,by=side?-52:-60,tx=(side?24:10)+aw*1.5,ty=side?-66:-76;
     ctx.strokeStyle='#4cc488';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx,by-bob);ctx.quadraticCurveTo(bx+5+aw,(by+ty)/2-bob,tx,ty-bob);ctx.stroke();
     const pu=mood==='happy'?1:.5+.5*Math.sin(time*6);
@@ -492,6 +548,27 @@ function drawAlien(x,feet,duck,inv,run){
   }else if(o===9){
     ctx.fillStyle='#c93a1c';ctx.beginPath();ctx.ellipse(1,-55-bob,17,13,0,Math.PI,0);ctx.fill();ctx.fillStyle='#a02e15';ctx.beginPath();ctx.ellipse(1,-54-bob,22,4,0,0,7);ctx.fill();
     ctx.fillStyle='#ffd24a';ctx.beginPath();ctx.moveTo(-5,-62-bob);ctx.lineTo(7,-62-bob);ctx.lineTo(7,-56-bob);ctx.lineTo(1,-52-bob);ctx.lineTo(-5,-56-bob);ctx.closePath();ctx.fill();
+  }else if(o===10){
+    ctx.fillStyle='#1c1c28';ctx.beginPath();ctx.ellipse(1,-55-bob,25,5,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-21,-55-bob);ctx.lineTo(1,-78-bob);ctx.lineTo(23,-55-bob);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#d9a441';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-21,-55-bob);ctx.lineTo(1,-78-bob);ctx.lineTo(23,-55-bob);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(1,-64-bob,3.4,0,7);ctx.fill();ctx.fillRect(-3,-61-bob,8,2);
+  }else if(o===11){
+    ctx.fillStyle='#f1f3fa';ctx.beginPath();ctx.arc(1,-46-bob,23,Math.PI,0);ctx.fill();ctx.fillStyle='#e8556b';ctx.fillRect(-22,-50-bob,46,4);
+    ctx.fillStyle='rgba(110,170,255,.35)';ctx.beginPath();ctx.ellipse(1,-43-bob,19,15,0,0,7);ctx.fill();ctx.strokeStyle='#f1f3fa';ctx.lineWidth=3;ctx.stroke();
+  }else if(o===12){
+    ctx.fillStyle='#c58a4a';ctx.beginPath();ctx.ellipse(1,-55-bob,29,5,0,0,7);ctx.fill();
+    ctx.fillStyle='#d9a05b';rr(-12,-73-bob,26,20,9);ctx.fill();ctx.strokeStyle='#a8702f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(1,-72-bob);ctx.lineTo(1,-62-bob);ctx.stroke();
+    ctx.fillStyle='#7a4a2a';ctx.fillRect(-12,-60-bob,26,4);
+  }else if(o===13){
+    ctx.fillStyle='#ffd24a';ctx.beginPath();ctx.moveTo(-14,-54-bob);ctx.lineTo(-14,-68-bob);ctx.lineTo(-7,-60-bob);ctx.lineTo(1,-73-bob);ctx.lineTo(9,-60-bob);ctx.lineTo(16,-68-bob);ctx.lineTo(16,-54-bob);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#e8556b';ctx.beginPath();ctx.arc(1,-60-bob,2.6,0,7);ctx.fill();ctx.fillStyle='#4fd0ff';ctx.beginPath();ctx.arc(-8,-57-bob,2,0,7);ctx.arc(10,-57-bob,2,0,7);ctx.fill();
+  }else if(o===14){
+    ctx.fillStyle='#ff9f4a';ctx.beginPath();ctx.ellipse(1,-54-bob,17,12,0,Math.PI,0);ctx.fill();ctx.fillRect(-16,-56-bob,34,5);
+    ctx.beginPath();ctx.moveTo(-13,-60-bob);ctx.lineTo(-15,-75-bob);ctx.lineTo(-3,-65-bob);ctx.fill();ctx.beginPath();ctx.moveTo(8,-65-bob);ctx.lineTo(17,-75-bob);ctx.lineTo(15,-60-bob);ctx.fill();
+    ctx.fillStyle='#ffe0b0';ctx.beginPath();ctx.moveTo(-12,-62-bob);ctx.lineTo(-13,-70-bob);ctx.lineTo(-6,-65-bob);ctx.fill();ctx.beginPath();ctx.moveTo(9,-65-bob);ctx.lineTo(15,-70-bob);ctx.lineTo(14,-62-bob);ctx.fill();
+  }else if(o===15){
+    ctx.fillStyle='#d02f2f';rr(-19,-57-bob,40,8,3);ctx.fill();ctx.fillStyle='#c0c8d0';rr(-6,-57-bob,13,8,2);ctx.fill();
+    ctx.strokeStyle='#d02f2f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-19,-53-bob);ctx.lineTo(-31,-58-bob+Math.sin(time*8)*2);ctx.moveTo(-19,-51-bob);ctx.lineTo(-31,-45-bob-Math.sin(time*8)*2);ctx.stroke();
   }else{
     ctx.fillStyle='#2a1a6a';ctx.beginPath();ctx.ellipse(1,-54-bob,21,4.5,0,0,7);ctx.fill();
     ctx.fillStyle='#3a2a8a';ctx.beginPath();ctx.moveTo(-13,-55-bob);ctx.quadraticCurveTo(-2,-70-bob,6+aw*.4,-92-bob);ctx.quadraticCurveTo(10,-68-bob,15,-55-bob);ctx.closePath();ctx.fill();
@@ -575,6 +652,48 @@ function drawJournal(){
   txt(d,W/2,408,13,'#ffe9b0','center','normal');
   txt('Улики: '+fa+'/'+TOTAL+' · Реликвии: '+book.r.filter(Boolean).length+'/'+PLANETS.length,W/2,434,13,'#9fe8ff');
 }
+function drawAch(){
+  drawBG(PLANETS[0]);ctx.fillStyle='rgba(15,8,40,.86)';ctx.fillRect(0,0,W,H);
+  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt('← Назад',71,27,14);
+  const n=ACH.filter(a=>achU[a.id]).length;
+  txt('🏆 Достижения · '+n+'/'+ACH.length,W/2,27,22,'#ffe66b');
+  ACH.forEach((a,i)=>{
+    const col=i<8?0:1,row=i%8,x=18+col*392,y=78+row*45,done=!!achU[a.id];
+    panel(x,y-19,376,40,12,done?'rgba(255,214,90,.2)':'rgba(255,255,255,.07)');
+    ctx.globalAlpha=done?1:.45;txt(a.e,x+22,y,22);ctx.globalAlpha=1;
+    txt(a.n,x+46,y-8,14,done?'#ffe66b':'#fff','left');
+    txt(a.d+(a.o!==undefined?' · 🎁 «'+OUT[a.o].n+'»':''),x+46,y+9,11,'#cfe8ff','left','normal');
+    txt(done?'✅':(a.p?a.p():''),x+366,y-8,done?16:12,'#fff','right');
+  });
+}
+function drawRec(){
+  drawBG(PLANETS[0]);ctx.fillStyle='rgba(15,8,40,.86)';ctx.fillRect(0,0,W,H);
+  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt('← Назад',71,27,14);
+  txt('🏁 Рекорды',W/2,27,22,'#ffe66b');
+  txt('Лучшие прохождения игры',198,66,14,'#9fe8ff');
+  for(let i=0;i<10;i++){
+    const y=96+i*30,r=rec.runs[i];
+    panel(18,y-13,360,26,10,'rgba(255,255,255,'+(r?0.1:0.04)+')');
+    txt((i+1)+'.',34,y,14,i<3?'#ffe66b':'#fff','left');
+    if(r){txt(r.s+' очков',70,y,14,'#fff','left');txt((r.n?'🌙 ночь':'☀️ день')+' · '+fmtDate(r.d),366,y,12,'#cfe8ff','right','normal');}
+    else txt('—',70,y,14,'rgba(255,255,255,.3)','left');
+  }
+  txt('Лучшее на каждой планете',596,66,14,'#9fe8ff');
+  for(let i=0;i<PLANETS.length;i++){
+    const y=96+i*30;panel(410,y-13,372,26,10,'rgba(255,255,255,.08)');
+    txt(PLANETS[i].name,420,y,12,'#fff','left');
+    txt(rec.bs[i]?rec.bs[i]+' очк. · '+fmtTime(rec.bt[i]):'—',772,y,12,rec.bs[i]?'#ffe66b':'rgba(255,255,255,.3)','right');
+  }
+  txt('Рекорды хранятся только на этом устройстве',W/2,H-18,12,'rgba(255,255,255,.55)','center','normal');
+}
+function drawAToast(){
+  if(!aToast||state==='menu'||state==='ach'||state==='rec'||state==='journal')return;
+  const y=state==='win'?232:150,a=Math.min(1,aToast.t*2);
+  ctx.globalAlpha=a;panel(W/2-210,y,420,48,14,'rgba(70,45,0,.93)');
+  txt('🏆 '+aToast.e+' '+aToast.n,W/2,y+16,15,'#ffe66b');
+  txt('Достижение'+aToast.x,W/2,y+35,12,'#fff','center','normal');
+  ctx.globalAlpha=1;
+}
 function drawParts(){for(const p of parts){ctx.globalAlpha=Math.max(0,p.l*1.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();}ctx.globalAlpha=1;}
 function overlay(title,lines,sub,col){
   ctx.fillStyle='rgba(10,5,30,.62)';ctx.fillRect(0,0,W,H);
@@ -590,7 +709,7 @@ function draw(){
   if(state==='menu'){
     pIdx=0;drawBG(PLANETS[0]);
     for(let i=0;i<9;i++){ctx.fillStyle=['#7fb0ff','#3fbf9f','#bfe9ff','#ffb347','#ffffff','#35d6c4','#d9a441','#ff7a30','#8a6bff'][i];ctx.beginPath();ctx.arc(70+i*82,95+Math.sin(time*1.5+i)*8,11+i%2*5,0,7);ctx.fill();}
-    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt('📖 Дневник улик',91,29,14,'#fff');
+    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt('📖 Дневник',91,29,14,'#fff');panel(172,12,150,34,17,'rgba(255,255,255,.2)');txt('🏆 Достижения',247,29,14,'#fff');panel(328,12,150,34,17,'rgba(255,255,255,.2)');txt('🏁 Рекорды',403,29,14,'#fff');
     txt('Зип: путь домой',W/2,150,46,'#fff');
     txt('Cozy mystery · кто украл звёздный ключ?',W/2,196,18,'#ffe9b0','center','normal');
     txt('Собери все артефакты на девяти планетах — и лети домой',W/2,228,15,'#fff','center','normal');
@@ -604,6 +723,8 @@ function draw(){
     return;
   }
   if(state==='journal'){pIdx=0;drawJournal();return;}
+  if(state==='ach'){pIdx=0;drawAch();return;}
+  if(state==='rec'){pIdx=0;drawRec();return;}
   if(state==='win'){
     drawHome();
     panel(60,14,680,206,24,'rgba(40,20,80,.9)');
@@ -647,7 +768,7 @@ function draw(){
   if(state==='end'){
     const mm=MISSIONS[pIdx],rl=RELICS[pIdx];
     const mLine=endInfo.md?(endInfo.relicNew?'🏅 Миссия выполнена! Реликвия: '+rl.e+' '+rl.n:'🏅 Миссия выполнена (реликвия уже в дневнике)'):'🎯 Миссия не выполнена: '+mm.t;
-    if(endInfo.ok)overlay('Планета пройдена! ✨',['Все артефакты здесь собраны.',endInfo.newOutfit?'Новый наряд для Зипа: «'+endInfo.newOutfit+'»! 🎉':'Портал открывается — летим дальше.',mLine],pIdx+1>=PLANETS.length?'Нажми — лететь домой!':'Нажми — следующая планета','#ffe66b');
+    if(endInfo.ok)overlay('Планета пройдена! ✨',['Все артефакты здесь собраны.',endInfo.newOutfit?'Новый наряд для Зипа: «'+endInfo.newOutfit+'»! 🎉':'Портал открывается — летим дальше.',mLine,'Бонус +'+endInfo.bonus+' · Счёт: '+score],pIdx+1>=PLANETS.length?'Нажми — лететь домой!':'Нажми — следующая планета','#ffe66b');
     else overlay('Портал закрыт',['Не хватает артефактов: '+endInfo.miss+'.','Они всё ещё лежат на планете — вернись и найди.',mLine],'Нажми, чтобы попробовать снова','#ff9aa8');
   }
 }
@@ -655,11 +776,11 @@ function draw(){
 let last=0;
 function frame(ts){
   const dt=Math.min(.033,(ts-last)/1000||.016);last=ts;
-  update(dt);draw();
+  update(dt);draw();drawAToast();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__dbg={go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
+window.__dbg={get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});}</script>
