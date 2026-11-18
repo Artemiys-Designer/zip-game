@@ -54,7 +54,7 @@ const OUTMAP=[1,2,3,4,6,7,8,9,5];
 const rand=(a,b)=>a+Math.random()*(b-a);
 let state='menu',pIdx=0,dist=0,speed=280,LEN=9000,time=0,score=0;
 let got=PLANETS.map(()=>[false,false,false]);
-let objs={obs:[],prizes:[],arts:[]};
+let objs={obs:[],prizes:[],arts:[],bon:[]};
 let P={y:GY,vy:0,jumps:0,duck:false,hearts:3,inv:0,run:0,onGround:true,mood:'',moodT:0},toast=null,parts=[],stars=[],introT=0,endInfo=null,saved=null;
 let keyDuck=false,touchDuck=false,duckPtr=null,pendingJump=false;
 for(let i=0;i<60;i++)stars.push({x:Math.random()*W,y:Math.random()*260,r:Math.random()*1.5+.4,t:Math.random()*6});
@@ -101,14 +101,228 @@ const ACH=[
  {id:'mod',e:'👒',n:'Модник',d:'Открой 8 нарядов',t:()=>ward.u.length>=8,p:()=>Math.min(ward.u.length,8)+'/8'},
  {id:'ward',e:'👑',n:'Гардероб',d:'Открой все наряды',t:()=>ward.u.length>=OUT.length,p:()=>ward.u.length+'/'+OUT.length}
 ];
-let aQ=[],aToast=null;
+const LANGS=['ru','en','de','es'],LNAME={ru:'Русский',en:'English',de:'Deutsch',es:'Español'};
+let LANG='ru';
+try{const l=localStorage.getItem('zip-lang');if(LANGS.includes(l))LANG=l;else{const n=((navigator.language||'en')+'').slice(0,2).toLowerCase();LANG=LANGS.includes(n)?n:'en';}}catch(e){}
+const TR={
+ 'Мармеладия':['Marmeladia','Marmeladia','Mermeladia'],
+ 'Грибной луг':['Mushroom Meadow','Pilzwiese','Prado de Setas'],
+ 'Ледяной пудинг':['Icy Pudding','Eispudding','Pudín Helado'],
+ 'Янтарная пустошь':['Amber Wasteland','Bernsteinöde','Páramo Ámbar'],
+ 'Облачные острова':['Cloud Islands','Wolkeninseln','Islas de Nubes'],
+ 'Светящийся риф':['Glowing Reef','Leuchtriff','Arrecife Luminoso'],
+ 'Шестерёночный город':['Gear City','Zahnradstadt','Ciudad de Engranajes'],
+ 'Тёплый вулкан':['Cozy Volcano','Warmer Vulkan','Volcán Cálido'],
+ 'Кристальная луна':['Crystal Moon','Kristallmond','Luna de Cristal'],
+ 'Гаечный ключ':['Wrench','Schraubenschlüssel','Llave inglesa'],
+ 'На рукоятке следы шоколада…':['There is chocolate on the handle…','Am Griff klebt Schokolade…','El mango tiene rastros de chocolate…'],
+ 'Звёздный компас':['Star compass','Sternenkompass','Brújula estelar'],
+ 'Стрелка дрожит: кто-то был совсем рядом.':['The needle trembles: someone was very close.','Die Nadel zittert: Jemand war ganz nah.','La aguja tiembla: alguien estuvo muy cerca.'],
+ 'Печенье':['Cookie','Keks','Galleta'],
+ 'Крошки ведут к Грибному лугу.':['The crumbs lead to Mushroom Meadow.','Die Krümel führen zur Pilzwiese.','Las migas llevan al Prado de Setas.'],
+ 'Золотой гриб':['Golden mushroom','Goldener Pilz','Seta dorada'],
+ 'Его аккуратно срезали, а не сорвали.':['It was neatly cut, not torn off.','Er wurde sauber abgeschnitten, nicht abgerissen.','Lo cortaron con cuidado, no lo arrancaron.'],
+ 'Фонарик':['Flashlight','Taschenlampe','Linterna'],
+ 'Батарейки ещё тёплые. Вор был здесь.':['The batteries are still warm. The thief was here.','Die Batterien sind noch warm. Der Dieb war hier.','Las pilas aún están tibias. El ladrón estuvo aquí.'],
+ 'Записка':['Note','Notiz','Nota'],
+ '«Не ищи меня до рассвета». Почерк круглый.':['"Don\'t look for me until dawn." Round handwriting.','„Such mich nicht vor Sonnenaufgang.“ Runde Handschrift.','«No me busques hasta el amanecer». Letra redondeada.'],
+ 'Ключ-снежинка':['Snowflake key','Schneeflockenschlüssel','Llave copo de nieve'],
+ 'Тает в руке, но замок помнит узор.':['It melts in your hand, but the lock remembers the pattern.','Er schmilzt in der Hand, aber das Schloss kennt das Muster.','Se derrite en la mano, pero la cerradura recuerda el dibujo.'],
+ 'Вязаный шарф':['Knitted scarf','Gestrickter Schal','Bufanda de lana'],
+ 'Пахнет лавандой. Кто носит такие?':['Smells of lavender. Who wears these?','Riecht nach Lavendel. Wer trägt so etwas?','Huele a lavanda. ¿Quién usa algo así?'],
+ 'Ложка от пудинга':['Pudding spoon','Puddinglöffel','Cuchara de pudín'],
+ 'Пудинг не тронут. Вор не любит сладкое?':['The pudding is untouched. Does the thief dislike sweets?','Der Pudding ist unberührt. Mag der Dieb keine Süßigkeiten?','El pudín está intacto. ¿Al ladrón no le gustan los dulces?'],
+ 'Подзорная труба':['Spyglass','Fernrohr','Catalejo'],
+ 'Направлена прямо на Кристальную луну.':['It points straight at the Crystal Moon.','Es zeigt direkt auf den Kristallmond.','Apunta directo a la Luna de Cristal.'],
+ 'Большое перо':['Big feather','Große Feder','Pluma grande'],
+ 'Слишком большое для обычной птицы.':['Too big for an ordinary bird.','Zu groß für einen gewöhnlichen Vogel.','Demasiado grande para un pájaro común.'],
+ 'Ржавый ключик':['Rusty key','Rostiger Schlüssel','Llavecita oxidada'],
+ 'Подходит к бортовому замку корабля!':['It fits the ship\'s hatch lock!','Passt zum Bordschloss des Raumschiffs!','¡Encaja en la cerradura de la nave!'],
+ 'Облачная подушка':['Cloud pillow','Wolkenkissen','Almohada de nube'],
+ 'На ней вмятина: кто-то долго сидел и ждал.':['There is a dent: someone sat here waiting for a long time.','Es gibt eine Delle: Jemand hat hier lange gesessen und gewartet.','Tiene una hendidura: alguien estuvo mucho tiempo esperando.'],
+ 'Воздушный змей':['Kite','Drachen','Cometa'],
+ 'К нитке привязан рецепт пирога.':['A pie recipe is tied to the string.','An der Schnur hängt ein Kuchenrezept.','Hay una receta de tarta atada al hilo.'],
+ 'Корзинка':['Basket','Körbchen','Cestita'],
+ 'Пустая. На дне перья и крошки пирога.':['Empty. Feathers and pie crumbs at the bottom.','Leer. Auf dem Boden Federn und Kuchenkrümel.','Vacía. En el fondo hay plumas y migas de tarta.'],
+ 'Ракушка-эхо':['Echo shell','Echo-Muschel','Caracola eco'],
+ 'Шепчет: «Приходи на ужин…»':['It whispers: "Come to dinner…"','Sie flüstert: „Komm zum Abendessen…“','Susurra: «Ven a cenar…»'],
+ 'Медуза-фонарик':['Lantern jellyfish','Laternen-Qualle','Medusa farolillo'],
+ 'Светит в сторону Шестерёночного города.':['It glows toward Gear City.','Sie leuchtet in Richtung Zahnradstadt.','Brilla hacia la Ciudad de Engranajes.'],
+ 'Карта течений':['Current map','Strömungskarte','Mapa de corrientes'],
+ 'Красный крестик стоит на Кристальной луне.':['A red cross is marked on the Crystal Moon.','Ein rotes Kreuz steht auf dem Kristallmond.','Hay una cruz roja en la Luna de Cristal.'],
+ 'Золотая шестерня':['Golden gear','Goldenes Zahnrad','Engranaje dorado'],
+ 'Часы города встали ровно в час ужина.':['The city clocks stopped exactly at dinner time.','Die Stadtuhren blieben genau zur Abendbrotzeit stehen.','Los relojes de la ciudad se pararon justo a la hora de cenar.'],
+ 'Будильник':['Alarm clock','Wecker','Despertador'],
+ 'Заведён на «время пирога».':['Set for "pie time".','Gestellt auf „Kuchenzeit“.','Programado para la «hora de la tarta».'],
+ 'Ящик инструментов':['Toolbox','Werkzeugkiste','Caja de herramientas'],
+ 'Не хватает одного ключа — звёздного.':['One wrench is missing: the star one.','Ein Schlüssel fehlt: der Sternenschlüssel.','Falta una llave: la estelar.'],
+ 'Остывший уголёк':['Cooled ember','Erkaltete Glut','Brasa enfriada'],
+ 'Тёплый и пахнет корицей.':['Warm and smells of cinnamon.','Warm und riecht nach Zimt.','Tibia y huele a canela.'],
+ 'Корочка пирога':['Pie crust','Kuchenkruste','Corteza de tarta'],
+ 'Свежая! Пекли совсем недавно.':['Fresh! It was baked just recently.','Frisch! Erst vor Kurzem gebacken.','¡Fresca! La hornearon hace poco.'],
+ 'Прихватка':['Oven mitt','Topflappen','Agarradera'],
+ 'На ней вышита сова.':['An owl is embroidered on it.','Darauf ist eine Eule aufgestickt.','Tiene un búho bordado.'],
+ 'Лунный кристалл':['Moon crystal','Mondkristall','Cristal lunar'],
+ 'Внутри мерцает чей-то силуэт с ушками.':['Inside shimmers a silhouette with little ears.','Darin schimmert eine Silhouette mit kleinen Ohren.','Dentro brilla una silueta con orejitas.'],
+ 'Статуэтка совы':['Owl statuette','Eulenfigur','Estatuilla de búho'],
+ 'Сова-хранительница! Так вот кто вор…':['The guardian owl! So that\'s the thief…','Die Hüter-Eule! Also war sie der Dieb…','¡El búho guardián! Así que era el ladrón…'],
+ 'Звёздный ключ':['Star key','Sternenschlüssel','Llave estelar'],
+ 'Он здесь! Корабль снова может лететь.':['It\'s here! The ship can fly again.','Er ist hier! Das Raumschiff kann wieder fliegen.','¡Está aquí! La nave puede volver a volar.'],
+ 'Собери 40 сладостей':['Collect 40 sweets','Sammle 40 Süßigkeiten','Recoge 40 dulces'],
+ 'Собери 80 сладостей':['Collect 80 sweets','Sammle 80 Süßigkeiten','Recoge 80 dulces'],
+ 'Собери 120 сладостей':['Collect 120 sweets','Sammle 120 Süßigkeiten','Recoge 120 dulces'],
+ 'Собери 2 звезды ⭐':['Collect 2 stars ⭐','Sammle 2 Sterne ⭐','Recoge 2 estrellas ⭐'],
+ 'Собери 3 звезды ⭐':['Collect 3 stars ⭐','Sammle 3 Sterne ⭐','Recoge 3 estrellas ⭐'],
+ 'Пройди без потери сердечка':['Finish without losing a heart','Schaffe es ohne Herzverlust','Termina sin perder un corazón'],
+ 'Подбери 2 бонуса':['Pick up 2 bonuses','Sammle 2 Boni ein','Recoge 2 bonus'],
+ 'Пройди без двойного прыжка':['Finish without a double jump','Schaffe es ohne Doppelsprung','Termina sin doble salto'],
+ 'Золотой леденец':['Golden lollipop','Goldener Lutscher','Piruleta dorada'],
+ 'Редкая сладость: за неё сыщики готовы на всё.':['A rare treat: detectives would do anything for it.','Eine seltene Süßigkeit: Detektive tun alles dafür.','Un dulce raro: los detectives harían cualquier cosa por él.'],
+ 'Грибной шар':['Mushroom orb','Pilzkugel','Esfera de seta'],
+ 'Показывает, где растут самые тёплые грибы.':['Shows where the warmest mushrooms grow.','Zeigt, wo die wärmsten Pilze wachsen.','Muestra dónde crecen las setas más cálidas.'],
+ 'Снеговичок':['Little snowman','Schneemännchen','Muñequito de nieve'],
+ 'Крошечный свидетель. Молчит, но смотрит внимательно.':['A tiny witness. Silent, but watches closely.','Ein winziger Zeuge. Schweigt, schaut aber genau hin.','Un testigo diminuto. Calla, pero mira con atención.'],
+ 'Янтарная амфора':['Amber amphora','Bernsteinamphore','Ánfora ámbar'],
+ 'Пахнет специями. Внутри старая карта.':['Smells of spices. An old map inside.','Riecht nach Gewürzen. Innen liegt eine alte Karte.','Huele a especias. Dentro hay un mapa antiguo.'],
+ 'Осколок радуги':['Rainbow shard','Regenbogensplitter','Fragmento de arcoíris'],
+ 'Тёплый на ощупь, переливается всеми цветами.':['Warm to the touch, shimmering in every colour.','Warm anzufassen, schimmert in allen Farben.','Tibio al tacto, brilla con todos los colores.'],
+ 'Светящийся кальмар':['Glowing squid','Leuchtkalmar','Calamar luminoso'],
+ 'Подмигнул и уплыл, оставив след из света.':['It winked and swam away, leaving a trail of light.','Er zwinkerte und schwamm davon, eine Lichtspur hinterlassend.','Guiñó un ojo y se fue nadando, dejando un rastro de luz.'],
+ 'Карманные часы':['Pocket watch','Taschenuhr','Reloj de bolsillo'],
+ 'Стрелки идут назад. Время пирога близко.':['The hands run backwards. Pie time is near.','Die Zeiger laufen rückwärts. Die Kuchenzeit naht.','Las agujas van hacia atrás. La hora de la tarta se acerca.'],
+ 'Вечный уголёк':['Eternal ember','Ewige Glut','Brasa eterna'],
+ 'Не гаснет. Греет лапки и душу.':['It never goes out. Warms paws and heart.','Sie erlischt nie. Wärmt Pfoten und Herz.','No se apaga. Calienta las patitas y el corazón.'],
+ 'Лунная шкатулка':['Moon music box','Mondspieldose','Cajita lunar'],
+ 'Играет колыбельную совы — грустную и нежную.':['It plays the owl\'s lullaby: sad and gentle.','Sie spielt das Schlaflied der Eule: traurig und zart.','Toca la nana del búho: triste y suave.'],
+ 'Сыщик':['Detective','Detektiv','Detective'],
+ 'Кондитер':['Pastry chef','Konditor','Pastelero'],
+ 'Грибник':['Mushroomer','Pilzsammler','Setero'],
+ 'Полярник':['Polar explorer','Polarforscher','Explorador polar'],
+ 'Путник':['Traveller','Wanderer','Viajero'],
+ 'Звездочёт':['Stargazer','Sterndeuter','Astrónomo'],
+ 'Лётчик':['Pilot','Pilot','Piloto'],
+ 'Ныряльщик':['Diver','Taucher','Buzo'],
+ 'Механик':['Mechanic','Mechaniker','Mecánico'],
+ 'Огнеборец':['Firefighter','Feuerwehrmann','Bombero'],
+ 'Пират':['Pirate','Pirat','Pirata'],
+ 'Космонавт':['Astronaut','Astronaut','Astronauta'],
+ 'Ковбой':['Cowboy','Cowboy','Vaquero'],
+ 'Король':['King','König','Rey'],
+ 'Котик':['Kitty','Kätzchen','Gatito'],
+ 'Нинджа':['Ninja','Ninja','Ninja'],
+ 'Первая планета':['First planet','Erster Planet','Primer planeta'],
+ 'Пройди первую планету':['Complete the first planet','Schließe den ersten Planeten ab','Completa el primer planeta'],
+ 'Сладкоежка':['Sweet tooth','Naschkatze','Goloso'],
+ 'Собери 500 сладостей':['Collect 500 sweets','Sammle 500 Süßigkeiten','Recoge 500 dulces'],
+ 'Звёздный дождь':['Star shower','Sternenregen','Lluvia de estrellas'],
+ 'Собери 25 звёзд':['Collect 25 stars','Sammle 25 Sterne','Recoge 25 estrellas'],
+ 'Коллекционер':['Collector','Sammler','Coleccionista'],
+ 'Найди 10 артефактов':['Find 10 artifacts','Finde 10 Artefakte','Encuentra 10 artefactos'],
+ 'Следопыт':['Trailblazer','Spurensucher','Rastreador'],
+ 'Найди все артефакты':['Find all artifacts','Finde alle Artefakte','Encuentra todos los artefactos'],
+ 'Мастер миссий':['Mission master','Missionsmeister','Maestro de misiones'],
+ 'Выполни 5 миссий':['Complete 5 missions','Erfülle 5 Missionen','Completa 5 misiones'],
+ 'Все реликвии':['All relics','Alle Relikte','Todas las reliquias'],
+ 'Выполни все миссии':['Complete all missions','Erfülle alle Missionen','Completa todas las misiones'],
+ 'Без царапин':['Not a scratch','Kein Kratzer','Sin un rasguño'],
+ 'Пройди планету без потери сердечка':['Finish a planet without losing a heart','Schließe einen Planeten ohne Herzverlust ab','Completa un planeta sin perder un corazón'],
+ 'Прыгун':['Jumper','Springer','Saltarín'],
+ 'Соверши 300 прыжков':['Make 300 jumps','Springe 300 Mal','Da 300 saltos'],
+ 'Воздушный акробат':['Air acrobat','Luftakrobat','Acróbata aéreo'],
+ 'Сделай 50 двойных прыжков':['Do 50 double jumps','Mache 50 Doppelsprünge','Haz 50 dobles saltos'],
+ 'Любитель бонусов':['Bonus lover','Bonus-Fan','Amante de bonus'],
+ 'Подбери 10 бонусов':['Pick up 10 bonuses','Sammle 10 Boni ein','Recoge 10 bonus'],
+ 'Щит выручил':['Shield to the rescue','Der Schild half','El escudo ayudó'],
+ 'Прими на щит 5 ударов':['Block 5 hits with the shield','Wehre 5 Treffer mit dem Schild ab','Bloquea 5 golpes con el escudo'],
+ 'Ночной сыщик':['Night detective','Nachtdetektiv','Detective nocturno'],
+ 'Пройди планету в ночном режиме':['Finish a planet in night mode','Schließe einen Planeten im Nachtmodus ab','Completa un planeta en modo nocturno'],
+ 'Домой!':['Home!','Nach Hause!','¡A casa!'],
+ 'Пройди всю игру':['Finish the whole game','Schließe das ganze Spiel ab','Termina todo el juego'],
+ 'Модник':['Fashionista','Modefan','Fashionista'],
+ 'Открой 8 нарядов':['Unlock 8 outfits','Schalte 8 Outfits frei','Desbloquea 8 trajes'],
+ 'Гардероб':['Wardrobe','Garderobe','Armario'],
+ 'Открой все наряды':['Unlock all outfits','Schalte alle Outfits frei','Desbloquea todos los trajes'],
+ 'с':['s','s','s'],
+ 'Улики: {0}/{1}':['Clues: {0}/{1}','Hinweise: {0}/{1}','Pistas: {0}/{1}'],
+ 'Артефакт: {0}':['Artifact: {0}','Artefakt: {0}','Artefacto: {0}'],
+ 'Слева — прыжок (два раза — двойной) · Справа держи — пригнуться':['Left: jump (twice for a double jump) · Right: hold to duck','Links: Sprung (zweimal für Doppelsprung) · Rechts halten: ducken','Izquierda: salto (dos veces, doble salto) · Derecha: mantén para agacharte'],
+ '← Назад':['← Back','← Zurück','← Atrás'],
+ '📖 Дневник улик':['📖 Clue journal','📖 Hinweis-Tagebuch','📖 Diario de pistas'],
+ 'Нажми на предмет, чтобы прочитать подсказку':['Tap an item to read its clue','Tippe auf einen Gegenstand, um den Hinweis zu lesen','Toca un objeto para leer la pista'],
+ 'Ещё не найдено':['Not found yet','Noch nicht gefunden','Aún no encontrado'],
+ ' (выполни миссию планеты)':[' (complete the planet mission)',' (erfülle die Planetenmission)',' (completa la misión del planeta)'],
+ 'Улики: {0}/{1} · Реликвии: {2}/{3}':['Clues: {0}/{1} · Relics: {2}/{3}','Hinweise: {0}/{1} · Relikte: {2}/{3}','Pistas: {0}/{1} · Reliquias: {2}/{3}'],
+ '🏆 Достижения · {0}/{1}':['🏆 Achievements · {0}/{1}','🏆 Erfolge · {0}/{1}','🏆 Logros · {0}/{1}'],
+ '🏁 Рекорды':['🏁 Records','🏁 Rekorde','🏁 Récords'],
+ 'Лучшие прохождения игры':['Best playthroughs','Beste Durchläufe','Mejores partidas'],
+ '{0} очков':['{0} points','{0} Punkte','{0} puntos'],
+ '🌙 ночь':['🌙 night','🌙 Nacht','🌙 noche'],
+ '☀️ день':['☀️ day','☀️ Tag','☀️ día'],
+ 'Лучшее на каждой планете':['Best on each planet','Bestwerte pro Planet','Lo mejor de cada planeta'],
+ '{0} очк. · {1}':['{0} pts · {1}','{0} Pkt. · {1}','{0} pts · {1}'],
+ 'Рекорды хранятся только на этом устройстве':['Records are stored on this device only','Rekorde werden nur auf diesem Gerät gespeichert','Los récords se guardan solo en este dispositivo'],
+ 'Достижение':['Achievement','Erfolg','Logro'],
+ 'наряд «{0}»':['outfit "{0}"','Outfit „{0}“','traje «{0}»'],
+ '📖 Дневник':['📖 Journal','📖 Tagebuch','📖 Diario'],
+ '🏆 Достижения':['🏆 Achievements','🏆 Erfolge','🏆 Logros'],
+ 'Зип: путь домой':['Zip: The Way Home','Zip: Der Weg nach Hause','Zip: el camino a casa'],
+ 'Зип: путь домой — cozy mystery':['Zip: The Way Home — cozy mystery','Zip: Der Weg nach Hause — Cozy Mystery','Zip: el camino a casa — cozy mystery'],
+ 'Cozy mystery · кто украл звёздный ключ?':['Cozy mystery · who stole the star key?','Cozy Mystery · Wer hat den Sternenschlüssel gestohlen?','Cozy mystery · ¿quién robó la llave estelar?'],
+ 'Собери все артефакты на девяти планетах — и лети домой':['Collect all artifacts on nine planets and fly home','Sammle alle Artefakte auf neun Planeten und flieg nach Hause','Reúne todos los artefactos en nueve planetas y vuela a casa'],
+ 'Продолжить · планета {0}':['Continue · planet {0}','Weiter · Planet {0}','Continuar · planeta {0}'],
+ 'Новая игра':['New game','Neues Spiel','Nueva partida'],
+ 'Играть':['Play','Spielen','Jugar'],
+ '🌙 Ночной режим: {0}':['🌙 Night mode: {0}','🌙 Nachtmodus: {0}','🌙 Modo nocturno: {0}'],
+ 'ВКЛ':['ON','AN','SÍ'],
+ 'выкл':['off','aus','no'],
+ 'Наряд: {0} · нажми на Зипа ({1}/{2})':['Outfit: {0} · tap Zip ({1}/{2})','Outfit: {0} · tippe auf Zip ({1}/{2})','Traje: {0} · toca a Zip ({1}/{2})'],
+ 'Тайна раскрыта! 🏡':['Mystery solved! 🏡','Geheimnis gelüftet! 🏡','¡Misterio resuelto! 🏡'],
+ 'Это была сова-хранительница. Она спрятала ключ,':['It was the guardian owl. She hid the key','Es war die Hüter-Eule. Sie hat den Schlüssel versteckt,','Fue el búho guardián. Escondió la llave'],
+ 'потому что не хотела, чтобы Зип улетал, не попробовав её пирог.':['because she did not want Zip to leave without trying her pie.','weil sie nicht wollte, dass Zip geht, ohne ihren Kuchen zu probieren.','porque no quería que Zip se fuera sin probar su tarta.'],
+ 'Зип остался на ужин — а потом вернулся домой. Тепло и тихо.':['Zip stayed for dinner, and then flew home. Warm and quiet.','Zip blieb zum Abendessen und flog dann nach Hause. Warm und still.','Zip se quedó a cenar y luego volvió a casa. Cálido y tranquilo.'],
+ 'Улики {0}/{1} · Реликвии {2}/{3} · Наряды {4}/{5}':['Clues {0}/{1} · Relics {2}/{3} · Outfits {4}/{5}','Hinweise {0}/{1} · Relikte {2}/{3} · Outfits {4}/{5}','Pistas {0}/{1} · Reliquias {2}/{3} · Trajes {4}/{5}'],
+ '🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться':['🌙 Night mode unlocked: switch it on in the menu · Tap to return','🌙 Nachtmodus freigeschaltet: im Menü aktivieren · Tippen zum Zurückkehren','🌙 Modo nocturno desbloqueado: actívalo en el menú · Toca para volver'],
+ 'Планета {0} из {1}':['Planet {0} of {1}','Planet {0} von {1}','Planeta {0} de {1}'],
+ 'Найди 3 артефакта и добеги до портала':['Find 3 artifacts and reach the portal','Finde 3 Artefakte und erreiche das Portal','Encuentra 3 artefactos y llega al portal'],
+ 'Осталось найти артефактов: {0}':['Artifacts left to find: {0}','Noch zu findende Artefakte: {0}','Artefactos por encontrar: {0}'],
+ '🎯 Миссия: {0}':['🎯 Mission: {0}','🎯 Mission: {0}','🎯 Misión: {0}'],
+ 'Нажми, чтобы начать':['Tap to start','Tippen zum Starten','Toca para empezar'],
+ 'Ой! Сердечки закончились':['Oops! Out of hearts','Oje! Keine Herzen mehr','¡Ups! Se acabaron los corazones'],
+ 'Не беда — найденные артефакты остались с тобой.':['No worries: the artifacts you found stay with you.','Kein Problem: Die gefundenen Artefakte bleiben bei dir.','No pasa nada: los artefactos encontrados siguen contigo.'],
+ 'Попробуем планету ещё раз?':['Shall we try the planet again?','Probieren wir den Planeten noch einmal?','¿Probamos el planeta otra vez?'],
+ 'Нажми, чтобы повторить':['Tap to retry','Tippen zum Wiederholen','Toca para repetir'],
+ '🏅 Миссия выполнена! Реликвия: {0} {1}':['🏅 Mission complete! Relic: {0} {1}','🏅 Mission erfüllt! Relikt: {0} {1}','🏅 ¡Misión cumplida! Reliquia: {0} {1}'],
+ '🏅 Миссия выполнена (реликвия уже в дневнике)':['🏅 Mission complete (relic already in the journal)','🏅 Mission erfüllt (Relikt schon im Tagebuch)','🏅 Misión cumplida (la reliquia ya está en el diario)'],
+ '🎯 Миссия не выполнена: {0}':['🎯 Mission not complete: {0}','🎯 Mission nicht erfüllt: {0}','🎯 Misión sin cumplir: {0}'],
+ 'Планета пройдена! ✨':['Planet complete! ✨','Planet geschafft! ✨','¡Planeta completado! ✨'],
+ 'Все артефакты здесь собраны.':['All artifacts here are collected.','Alle Artefakte hier sind gesammelt.','Todos los artefactos de aquí están reunidos.'],
+ 'Новый наряд для Зипа: «{0}»! 🎉':['New outfit for Zip: "{0}"! 🎉','Neues Outfit für Zip: „{0}“! 🎉','¡Nuevo traje para Zip: «{0}»! 🎉'],
+ 'Портал открывается — летим дальше.':['The portal opens: onward!','Das Portal öffnet sich: weiter geht\'s.','El portal se abre: ¡adelante!'],
+ 'Бонус +{0} · Счёт: {1}':['Bonus +{0} · Score: {1}','Bonus +{0} · Punkte: {1}','Bonus +{0} · Puntos: {1}'],
+ 'Нажми — лететь домой!':['Tap to fly home!','Tippen: nach Hause fliegen!','¡Toca para volar a casa!'],
+ 'Нажми — следующая планета':['Tap for the next planet','Tippen: nächster Planet','Toca: siguiente planeta'],
+ 'Портал закрыт':['Portal closed','Portal geschlossen','Portal cerrado'],
+ 'Не хватает артефактов: {0}.':['Artifacts missing: {0}.','Es fehlen Artefakte: {0}.','Faltan artefactos: {0}.'],
+ 'Они всё ещё лежат на планете — вернись и найди.':['They are still lying on the planet: go back and find them.','Sie liegen noch auf dem Planeten: Kehre zurück und finde sie.','Siguen en el planeta: vuelve y encuéntralos.'],
+ 'Нажми, чтобы попробовать снова':['Tap to try again','Tippen für einen neuen Versuch','Toca para intentarlo de nuevo']
+};
+const tr=k=>{if(LANG==='ru')return k;const a=TR[k];return a?a[LANG==='en'?0:LANG==='de'?1:2]:k;};
+const f=(k,...a)=>tr(k).replace(/\{(\d)\}/g,(m,i)=>a[+i]);
+function applyLang(){
+  const fx=(o,ks)=>ks.forEach(k=>{if(o['_'+k]===undefined)o['_'+k]=o[k];o[k]=tr(o['_'+k]);});
+  PLANETS.forEach(p=>{fx(p,['name']);p.arts.forEach(a=>fx(a,['n','c']));});
+  MISSIONS.forEach(m=>fx(m,['t']));RELICS.forEach(r=>fx(r,['n','c']));OUT.forEach(o=>fx(o,['n']));ACH.forEach(a=>fx(a,['n','d']));
+  try{document.title=tr('Зип: путь домой — cozy mystery');document.documentElement.lang=LANG;}catch(e){}
+}
+function nextLang(){LANG=LANGS[(LANGS.indexOf(LANG)+1)%LANGS.length];try{localStorage.setItem('zip-lang',LANG);}catch(e){}applyLang();}
+let aQ=[],aToast=null;applyLang();
 function checkAch(){
   let ch=false;
   for(const a of ACH){
     if(achU[a.id])continue;
     let ok=false;try{ok=a.t();}catch(e){}
     if(ok){achU[a.id]=true;ch=true;let x='';
-      if(a.o!==undefined&&!ward.u.includes(a.o)){ward.u.push(a.o);saveWard();x=' · наряд «'+OUT[a.o].n+'»';}
+      if(a.o!==undefined&&!ward.u.includes(a.o)){ward.u.push(a.o);saveWard();x=' · '+f('наряд «{0}»',OUT[a.o].n);}
       aQ.push({e:a.e,n:a.n,x});}
   }
   if(ch){saveMeta();checkAch();}
@@ -156,7 +370,7 @@ function toggleMusic(){musicOn=!musicOn;try{localStorage.setItem('zip-music',mus
 function startPlanet(i,retry){
   if(retry)score=score0;else score0=score;tPlay=0;
   pIdx=i;const pl=PLANETS[i];
-  LEN=14000+i*1700;speed=(215+i*12)*(night?1.15:1);dist=0;
+  LEN=12500+i*1500;speed=(185+i*10)*(night?1.1:1);dist=0;
   objs={obs:[],prizes:[],arts:[],bon:[]};parts=[];toast=null;R={candy:0,star:0,bonus:0,hit:0,dj:0};
   P={y:GY,vy:0,jumps:0,duck:false,hearts:3,inv:0,run:0,onGround:true,mood:'',moodT:0,magnet:0,shield:false};
   const artX=[.2,.5,.78].map(f=>Math.round(LEN*f));
@@ -171,13 +385,13 @@ function startPlanet(i,retry){
       objs.obs.push({x,w:54,h:30,y:GY-74,by:GY-74,air:true,bob:true});
       for(let k=0;k<4;k++)objs.prizes.push({x:x-30+k*30,y:GY-20,got:false,star:false});
     }else if(i>=2&&r<.28){
-      objs.obs.push({x:x+200,w:34,h:34,y:GY-34,air:false,roll:true,vx:90+i*8});
+      objs.obs.push({x:x+200,w:34,h:34,y:GY-34,air:false,roll:true,vx:75+i*6});
     }else if(r<.42){
-      const w=rand(80,105),h=rand(30,40);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,w/2+50,h+60,6);
+      const w=rand(72,92),h=rand(30,40);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,w/2+50,h+60,6);
     }else if(r<.56){
       const w=rand(28,36),h=rand(70,88);objs.obs.push({x,w,h,y:GY-h,air:false});arc(x+w/2,60,h+60,5);
     }else if(r<.72){
-      const w1=rand(28,32),h1=rand(30,40),w2=rand(28,32),h2=rand(30,40),gap=rand(38,46);
+      const w1=rand(26,30),h1=rand(30,38),w2=rand(26,30),h2=rand(30,38),gap=rand(34,40);
       objs.obs.push({x,w:w1,h:h1,y:GY-h1,air:false});objs.obs.push({x:x+w1+gap,w:w2,h:h2,y:GY-h2,air:false});
       arc(x+(w1+gap+w2)/2,(w1+gap+w2)/2+40,Math.max(h1,h2)+65,7);x+=w1+gap+w2;
     }else{
@@ -201,13 +415,14 @@ function totalGot(){return got.reduce((s,r)=>s+r.filter(Boolean).length,0);}
 // ---------- input ----------
 function doJump(){
   if(state!=='play')return;
-  if(P.jumps<2){P.vy=P.jumps===0?-650:-580;P.jumps++;stats.jumps++;P.onGround=false;sJump();if(P.jumps===2){R.dj++;stats.dj++;burst(PX,P.y-4,'#9fe8ff',12);}}
+  if(P.jumps<2){P.vy=P.jumps===0?-620:-560;P.jumps++;stats.jumps++;P.onGround=false;sJump();if(P.jumps===2){R.dj++;stats.dj++;burst(PX,P.y-4,'#9fe8ff',12);}}
 }
 function menuBtns(){return saved?[{x:240,y:268,w:320,h:50,a:'cont'},{x:240,y:330,w:320,h:50,a:'new'}]:[{x:240,y:285,w:320,h:58,a:'new'}];}
 function onTap(x,y,id){
   if(x>W-56&&((state==='menu'&&y<56)||(state!=='menu'&&y>=50&&y<90))){toggleMusic();beep(520,.08,'triangle',.05);return;}
   if(state==='menu'){
     if(x>=16&&x<=166&&y>=12&&y<=46){state='journal';jSel=null;beep(600,.08,'triangle',.05);return;}
+    if(x>=626&&x<=738&&y>=12&&y<=46){nextLang();beep(660,.08,'triangle',.05);return;}
     if(x>=172&&x<=322&&y>=12&&y<=46){state='ach';beep(600,.08,'triangle',.05);return;}
     if(x>=328&&x<=478&&y>=12&&y<=46){state='rec';beep(600,.08,'triangle',.05);return;}
     if(wonOnce&&x>=240&&x<=560&&y>=388&&y<=424){night=!night;try{localStorage.setItem('zip-night',night?'1':'0');}catch(e){}beep(night?330:520,.12,'triangle',.06);return;}
@@ -258,7 +473,7 @@ function update(dt){
   if(P.inv>0)P.inv-=dt;if(P.moodT>0)P.moodT-=dt;
   const wantDuck=keyDuck||touchDuck;
   P.duck=wantDuck&&P.onGround;
-  P.vy+=1600*dt;P.y+=P.vy*dt;
+  P.vy+=1400*dt;P.y+=P.vy*dt;
   if(P.y>=GY){P.y=GY;P.vy=0;P.onGround=true;P.jumps=0;}
   const bh=P.duck?28:52;
   const hb={x:PX-13,y:P.y-bh+4,w:26,h:bh-6};
@@ -595,8 +810,8 @@ function drawHUD(){
   const prog=Math.min(1,(dist+PX)/LEN);
   ctx.fillStyle='rgba(20,10,45,.6)';rr(W/2-150,54,300,8,4);ctx.fill();
   ctx.fillStyle='#ffe66b';rr(W/2-150,54,300*prog,8,4);ctx.fill();
-  txt('Улики: '+totalGot()+'/'+TOTAL,70,62,13,'#fff','center');
-  if(P.magnet>0)txt('🧲 '+Math.ceil(P.magnet)+'с',190,62,13,'#ffd1f0');
+  txt(f('Улики: {0}/{1}',totalGot(),TOTAL),70,62,13,'#fff','center');
+  if(P.magnet>0)txt('🧲 '+Math.ceil(P.magnet)+tr('с'),190,62,13,'#ffd1f0');
   if(P.shield)txt('🛡️',250,62,15);
   txt(musicOn?'🔊':'🔇',W-26,70,18);
   {const mm=MISSIONS[pIdx],tx='🎯 '+mm.t+': '+missionProg(pIdx);ctx.font='bold 12px system-ui';const tw=ctx.measureText(tx).width;panel(8,H-34,tw+24,24,12,'rgba(20,10,45,.7)');txt(tx,20,H-22,12,'#fff','left');}
@@ -604,11 +819,11 @@ function drawHUD(){
     const a=Math.min(1,toast.t*2);ctx.globalAlpha=a;
     panel(W/2-250,76,500,64,16,'rgba(40,20,80,.9)');
     txt(toast.e,W/2-220,108,30);
-    txt('Артефакт: '+toast.n,W/2+10,95,17,'#ffe66b');
+    txt(f('Артефакт: {0}',toast.n),W/2+10,95,17,'#ffe66b');
     txt(toast.c,W/2+10,119,13,'#fff','center','normal');
     ctx.globalAlpha=1;
   }
-  if(time<1e9&&dist<900&&state==='play'){txt('Слева — прыжок (два раза — двойной) · Справа держи — пригнуться',W/2,H-56,14,'rgba(255,255,255,.85)','center','normal');}
+  if(time<1e9&&dist<900&&state==='play'){txt(tr('Слева — прыжок (два раза — двойной) · Справа держи — пригнуться'),W/2,H-56,14,'rgba(255,255,255,.85)','center','normal');}
 }
 function drawNight(){
   const g=ctx.createRadialGradient(PX,P.y-30,80,PX,P.y-30,330);g.addColorStop(0,'rgba(5,3,25,0)');g.addColorStop(1,'rgba(5,3,25,.86)');
@@ -632,8 +847,8 @@ function drawHome(){
 }
 function drawJournal(){
   drawBG(PLANETS[0]);ctx.fillStyle='rgba(15,8,40,.84)';ctx.fillRect(0,0,W,H);
-  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt('← Назад',71,27,14);
-  txt('📖 Дневник улик',W/2,27,22,'#ffe66b');
+  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt(tr('← Назад'),71,27,14);
+  txt(tr('📖 Дневник улик'),W/2,27,22,'#ffe66b');
   let fa=0;
   for(let r=0;r<PLANETS.length;r++){
     const sy=84+r*35;
@@ -647,16 +862,16 @@ function drawJournal(){
     }
     txt((book.r[r]?'✅ ':'⬜ ')+MISSIONS[r].t,540,sy,12,'#cfe8ff','left','normal');
   }
-  let d='Нажми на предмет, чтобы прочитать подсказку';
-  if(jSel){const it=jSel.k<3?PLANETS[jSel.r].arts[jSel.k]:RELICS[jSel.r];const have=jSel.k<3?book.a[jSel.r][jSel.k]:book.r[jSel.r];d=have?it.e+' '+it.n+' — '+it.c:'Ещё не найдено'+(jSel.k===3?' (выполни миссию планеты)':'');}
+  let d=tr('Нажми на предмет, чтобы прочитать подсказку');
+  if(jSel){const it=jSel.k<3?PLANETS[jSel.r].arts[jSel.k]:RELICS[jSel.r];const have=jSel.k<3?book.a[jSel.r][jSel.k]:book.r[jSel.r];d=have?it.e+' '+it.n+' — '+it.c:tr('Ещё не найдено')+(jSel.k===3?tr(' (выполни миссию планеты)'):'');}
   txt(d,W/2,408,13,'#ffe9b0','center','normal');
-  txt('Улики: '+fa+'/'+TOTAL+' · Реликвии: '+book.r.filter(Boolean).length+'/'+PLANETS.length,W/2,434,13,'#9fe8ff');
+  txt(f('Улики: {0}/{1} · Реликвии: {2}/{3}',fa,TOTAL,book.r.filter(Boolean).length,PLANETS.length),W/2,434,13,'#9fe8ff');
 }
 function drawAch(){
   drawBG(PLANETS[0]);ctx.fillStyle='rgba(15,8,40,.86)';ctx.fillRect(0,0,W,H);
-  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt('← Назад',71,27,14);
+  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt(tr('← Назад'),71,27,14);
   const n=ACH.filter(a=>achU[a.id]).length;
-  txt('🏆 Достижения · '+n+'/'+ACH.length,W/2,27,22,'#ffe66b');
+  txt(f('🏆 Достижения · {0}/{1}',n,ACH.length),W/2,27,22,'#ffe66b');
   ACH.forEach((a,i)=>{
     const col=i<8?0:1,row=i%8,x=18+col*392,y=78+row*45,done=!!achU[a.id];
     panel(x,y-19,376,40,12,done?'rgba(255,214,90,.2)':'rgba(255,255,255,.07)');
@@ -668,30 +883,30 @@ function drawAch(){
 }
 function drawRec(){
   drawBG(PLANETS[0]);ctx.fillStyle='rgba(15,8,40,.86)';ctx.fillRect(0,0,W,H);
-  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt('← Назад',71,27,14);
-  txt('🏁 Рекорды',W/2,27,22,'#ffe66b');
-  txt('Лучшие прохождения игры',198,66,14,'#9fe8ff');
+  panel(16,10,110,34,17,'rgba(255,255,255,.2)');txt(tr('← Назад'),71,27,14);
+  txt(tr('🏁 Рекорды'),W/2,27,22,'#ffe66b');
+  txt(tr('Лучшие прохождения игры'),198,66,14,'#9fe8ff');
   for(let i=0;i<10;i++){
     const y=96+i*30,r=rec.runs[i];
     panel(18,y-13,360,26,10,'rgba(255,255,255,'+(r?0.1:0.04)+')');
     txt((i+1)+'.',34,y,14,i<3?'#ffe66b':'#fff','left');
-    if(r){txt(r.s+' очков',70,y,14,'#fff','left');txt((r.n?'🌙 ночь':'☀️ день')+' · '+fmtDate(r.d),366,y,12,'#cfe8ff','right','normal');}
+    if(r){txt(f('{0} очков',r.s),70,y,14,'#fff','left');txt(tr(r.n?'🌙 ночь':'☀️ день')+' · '+fmtDate(r.d),366,y,12,'#cfe8ff','right','normal');}
     else txt('—',70,y,14,'rgba(255,255,255,.3)','left');
   }
-  txt('Лучшее на каждой планете',596,66,14,'#9fe8ff');
+  txt(tr('Лучшее на каждой планете'),596,66,14,'#9fe8ff');
   for(let i=0;i<PLANETS.length;i++){
     const y=96+i*30;panel(410,y-13,372,26,10,'rgba(255,255,255,.08)');
     txt(PLANETS[i].name,420,y,12,'#fff','left');
-    txt(rec.bs[i]?rec.bs[i]+' очк. · '+fmtTime(rec.bt[i]):'—',772,y,12,rec.bs[i]?'#ffe66b':'rgba(255,255,255,.3)','right');
+    txt(rec.bs[i]?f('{0} очк. · {1}',rec.bs[i],fmtTime(rec.bt[i])):'—',772,y,12,rec.bs[i]?'#ffe66b':'rgba(255,255,255,.3)','right');
   }
-  txt('Рекорды хранятся только на этом устройстве',W/2,H-18,12,'rgba(255,255,255,.55)','center','normal');
+  txt(tr('Рекорды хранятся только на этом устройстве'),W/2,H-18,12,'rgba(255,255,255,.55)','center','normal');
 }
 function drawAToast(){
   if(!aToast||state==='menu'||state==='ach'||state==='rec'||state==='journal')return;
   const y=state==='win'?232:150,a=Math.min(1,aToast.t*2);
   ctx.globalAlpha=a;panel(W/2-210,y,420,48,14,'rgba(70,45,0,.93)');
   txt('🏆 '+aToast.e+' '+aToast.n,W/2,y+16,15,'#ffe66b');
-  txt('Достижение'+aToast.x,W/2,y+35,12,'#fff','center','normal');
+  txt(tr('Достижение')+aToast.x,W/2,y+35,12,'#fff','center','normal');
   ctx.globalAlpha=1;
 }
 function drawParts(){for(const p of parts){ctx.globalAlpha=Math.max(0,p.l*1.6);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();}ctx.globalAlpha=1;}
@@ -709,16 +924,16 @@ function draw(){
   if(state==='menu'){
     pIdx=0;drawBG(PLANETS[0]);
     for(let i=0;i<9;i++){ctx.fillStyle=['#7fb0ff','#3fbf9f','#bfe9ff','#ffb347','#ffffff','#35d6c4','#d9a441','#ff7a30','#8a6bff'][i];ctx.beginPath();ctx.arc(70+i*82,95+Math.sin(time*1.5+i)*8,11+i%2*5,0,7);ctx.fill();}
-    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt('📖 Дневник',91,29,14,'#fff');panel(172,12,150,34,17,'rgba(255,255,255,.2)');txt('🏆 Достижения',247,29,14,'#fff');panel(328,12,150,34,17,'rgba(255,255,255,.2)');txt('🏁 Рекорды',403,29,14,'#fff');
-    txt('Зип: путь домой',W/2,150,46,'#fff');
-    txt('Cozy mystery · кто украл звёздный ключ?',W/2,196,18,'#ffe9b0','center','normal');
-    txt('Собери все артефакты на девяти планетах — и лети домой',W/2,228,15,'#fff','center','normal');
+    panel(16,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('📖 Дневник'),91,29,14,'#fff');panel(172,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏆 Достижения'),247,29,14,'#fff');panel(328,12,150,34,17,'rgba(255,255,255,.2)');txt(tr('🏁 Рекорды'),403,29,14,'#fff');panel(626,12,112,34,17,'rgba(255,255,255,.2)');txt('🌐 '+LNAME[LANG],682,29,13,'#fff');
+    txt(tr('Зип: путь домой'),W/2,150,46,'#fff');
+    txt(tr('Cozy mystery · кто украл звёздный ключ?'),W/2,196,18,'#ffe9b0','center','normal');
+    txt(tr('Собери все артефакты на девяти планетах — и лети домой'),W/2,228,15,'#fff','center','normal');
     const bs=menuBtns();
-    if(saved){btn(bs[0],'Продолжить · планета '+(saved.p+1),true);btn(bs[1],'Новая игра',false);}
-    else btn(bs[0],'Играть',true);
-    if(wonOnce)btn({x:240,y:388,w:320,h:36},'🌙 Ночной режим: '+(night?'ВКЛ':'выкл'),night);
+    if(saved){btn(bs[0],f('Продолжить · планета {0}',saved.p+1),true);btn(bs[1],tr('Новая игра'),false);}
+    else btn(bs[0],tr('Играть'),true);
+    if(wonOnce)btn({x:240,y:388,w:320,h:36},f('🌙 Ночной режим: {0}',tr(night?'ВКЛ':'выкл')),night);
     txt(musicOn?'🔊':'🔇',W-28,28,22);
-    dist+=1.5;drawWeather(PLANETS[0]);txt('Наряд: '+OUT[ward.sel].n+' · нажми на Зипа ('+ward.u.length+'/'+OUT.length+')',200,436,13,'#fff','center','normal');drawAlien(W/2-200,GY,false,0,time*6);
+    dist+=1.5;drawWeather(PLANETS[0]);txt(f('Наряд: {0} · нажми на Зипа ({1}/{2})',OUT[ward.sel].n,ward.u.length,OUT.length),200,436,13,'#fff','center','normal');drawAlien(W/2-200,GY,false,0,time*6);
     time+=.016;
     return;
   }
@@ -728,12 +943,12 @@ function draw(){
   if(state==='win'){
     drawHome();
     panel(60,14,680,206,24,'rgba(40,20,80,.9)');
-    txt('Тайна раскрыта! 🏡',W/2,48,30,'#ffe66b');
-    txt('Это была сова-хранительница. Она спрятала ключ,',W/2,88,16,'#fff','center','normal');
-    txt('потому что не хотела, чтобы Зип улетал, не попробовав её пирог.',W/2,112,16,'#fff','center','normal');
-    txt('Зип остался на ужин — а потом вернулся домой. Тепло и тихо.',W/2,136,16,'#fff','center','normal');
-    txt('Улики '+totalGot()+'/'+TOTAL+' · Реликвии '+book.r.filter(Boolean).length+'/'+PLANETS.length+' · Наряды '+ward.u.length+'/'+OUT.length,W/2,168,15,'#9fe8ff');
-    txt('🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться',W/2,198,13,'#ffe9b0','center','normal');
+    txt(tr('Тайна раскрыта! 🏡'),W/2,48,30,'#ffe66b');
+    txt(tr('Это была сова-хранительница. Она спрятала ключ,'),W/2,88,16,'#fff','center','normal');
+    txt(tr('потому что не хотела, чтобы Зип улетал, не попробовав её пирог.'),W/2,112,16,'#fff','center','normal');
+    txt(tr('Зип остался на ужин — а потом вернулся домой. Тепло и тихо.'),W/2,136,16,'#fff','center','normal');
+    txt(f('Улики {0}/{1} · Реликвии {2}/{3} · Наряды {4}/{5}',totalGot(),TOTAL,book.r.filter(Boolean).length,PLANETS.length,ward.u.length,OUT.length),W/2,168,15,'#9fe8ff');
+    txt(tr('🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться'),W/2,198,13,'#ffe9b0','center','normal');
     return;
   }
   drawBG(pl);
@@ -757,19 +972,19 @@ function draw(){
   if(state!=='intro')drawHUD();
   if(state==='intro'){
     ctx.fillStyle='rgba(10,5,30,.55)';ctx.fillRect(0,0,W,H);
-    txt('Планета '+(pIdx+1)+' из '+PLANETS.length,W/2,160,18,'#9fe8ff');
+    txt(f('Планета {0} из {1}',pIdx+1,PLANETS.length),W/2,160,18,'#9fe8ff');
     txt(pl.name,W/2,205,44,'#fff');
     const miss=planetMissing(pIdx);
-    txt(miss===3?'Найди 3 артефакта и добеги до портала':'Осталось найти артефактов: '+miss,W/2,255,18,'#ffe9b0','center','normal');
-    txt('🎯 Миссия: '+MISSIONS[pIdx].t,W/2,290,17,'#9fe8ff','center','normal');
-    txt('Нажми, чтобы начать',W/2,328,14,'rgba(255,255,255,.7)','center','normal');
+    txt(miss===3?tr('Найди 3 артефакта и добеги до портала'):f('Осталось найти артефактов: {0}',miss),W/2,255,18,'#ffe9b0','center','normal');
+    txt(f('🎯 Миссия: {0}',MISSIONS[pIdx].t),W/2,290,17,'#9fe8ff','center','normal');
+    txt(tr('Нажми, чтобы начать'),W/2,328,14,'rgba(255,255,255,.7)','center','normal');
   }
-  if(state==='dead')overlay('Ой! Сердечки закончились',['Не беда — найденные артефакты остались с тобой.','Попробуем планету ещё раз?'],'Нажми, чтобы повторить');
+  if(state==='dead')overlay(tr('Ой! Сердечки закончились'),[tr('Не беда — найденные артефакты остались с тобой.'),tr('Попробуем планету ещё раз?')],tr('Нажми, чтобы повторить'));
   if(state==='end'){
     const mm=MISSIONS[pIdx],rl=RELICS[pIdx];
-    const mLine=endInfo.md?(endInfo.relicNew?'🏅 Миссия выполнена! Реликвия: '+rl.e+' '+rl.n:'🏅 Миссия выполнена (реликвия уже в дневнике)'):'🎯 Миссия не выполнена: '+mm.t;
-    if(endInfo.ok)overlay('Планета пройдена! ✨',['Все артефакты здесь собраны.',endInfo.newOutfit?'Новый наряд для Зипа: «'+endInfo.newOutfit+'»! 🎉':'Портал открывается — летим дальше.',mLine,'Бонус +'+endInfo.bonus+' · Счёт: '+score],pIdx+1>=PLANETS.length?'Нажми — лететь домой!':'Нажми — следующая планета','#ffe66b');
-    else overlay('Портал закрыт',['Не хватает артефактов: '+endInfo.miss+'.','Они всё ещё лежат на планете — вернись и найди.',mLine],'Нажми, чтобы попробовать снова','#ff9aa8');
+    const mLine=endInfo.md?(endInfo.relicNew?f('🏅 Миссия выполнена! Реликвия: {0} {1}',rl.e,rl.n):tr('🏅 Миссия выполнена (реликвия уже в дневнике)')):f('🎯 Миссия не выполнена: {0}',mm.t);
+    if(endInfo.ok)overlay(tr('Планета пройдена! ✨'),[tr('Все артефакты здесь собраны.'),endInfo.newOutfit?f('Новый наряд для Зипа: «{0}»! 🎉',endInfo.newOutfit):tr('Портал открывается — летим дальше.'),mLine,f('Бонус +{0} · Счёт: {1}',endInfo.bonus,score)],pIdx+1>=PLANETS.length?tr('Нажми — лететь домой!'):tr('Нажми — следующая планета'),'#ffe66b');
+    else overlay(tr('Портал закрыт'),[f('Не хватает артефактов: {0}.',endInfo.miss),tr('Они всё ещё лежат на планете — вернись и найди.'),mLine],tr('Нажми, чтобы попробовать снова'),'#ff9aa8');
   }
 }
 
