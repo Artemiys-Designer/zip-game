@@ -21,7 +21,8 @@ canvas{width:min(100vw,calc(100vh*16/9));height:auto;aspect-ratio:16/9;display:b
 </style>
 </head>
 <body>
-<div id="rot">📱↻<br><br>Поверните телефон горизонтально</div>
+<div id="rot">📱↻<br><br><span id="rott">Поверните телефон горизонтально</span></div>
+<script>(function(){var T={ru:'Поверните телефон горизонтально',en:'Please rotate your phone to landscape',de:'Bitte drehe dein Handy ins Querformat',es:'Gira el teléfono en horizontal'},l='en';try{var s=localStorage.getItem('zip-lang');if(T[s])l=s;else{var n=((navigator.language||'en')+'').slice(0,2).toLowerCase();if(T[n])l=n;}}catch(e){}document.getElementById('rott').textContent=T[l];})();</script>
 <canvas id="c" width="800" height="450"></canvas>
 <script>
 (()=>{
