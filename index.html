@@ -106,6 +106,32 @@ const LANGS=['ru','en','de','es'],LNAME={ru:'Русский',en:'English',de:'De
 let LANG='ru';
 try{const l=localStorage.getItem('zip-lang');if(LANGS.includes(l))LANG=l;else{const n=((navigator.language||'en')+'').slice(0,2).toLowerCase();LANG=LANGS.includes(n)?n:'en';}}catch(e){}
 const TR={
+ 'Мой корабль не взлетит без звёздного ключа — его украли!':['My ship cannot take off without the star key. Someone stole it!','Mein Raumschiff startet nicht ohne den Sternenschlüssel. Er wurde gestohlen!','¡Mi nave no despega sin la llave estelar. Alguien la robó!'],
+ 'Надо найти вора. Начну с Мармеладии: там пахнет шоколадом.':['I must find the thief. I will start on Marmeladia: it smells of chocolate.','Ich muss den Dieb finden. Ich beginne auf Marmeladia: Es riecht nach Schokolade.','Debo encontrar al ladrón. Empezaré en Mermeladia: huele a chocolate.'],
+ 'На гаечном ключе — следы шоколада. Вор явно сладкоежка.':['There is chocolate on the wrench. The thief clearly has a sweet tooth.','Am Schraubenschlüssel klebt Schokolade. Der Dieb ist offenbar eine Naschkatze.','Hay chocolate en la llave inglesa. El ladrón es claramente un goloso.'],
+ 'Крошки ведут на Грибной луг. Идём туда!':['The crumbs lead to Mushroom Meadow. Let us go there!','Die Krümel führen zur Pilzwiese. Gehen wir hin!','Las migas llevan al Prado de Setas. ¡Vamos allí!'],
+ 'Гриб срезан аккуратно, а записка написана круглым почерком.':['The mushroom was cut neatly, and the note is in round handwriting.','Der Pilz wurde sauber abgeschnitten, und die Notiz hat eine runde Handschrift.','La seta se cortó con cuidado y la nota tiene letra redondeada.'],
+ 'Вор вежливый и спокойный. Это очень странно…':['The thief is polite and calm. How very strange…','Der Dieb ist höflich und ruhig. Wie seltsam…','El ladrón es educado y tranquilo. Qué extraño…'],
+ 'Шарф пахнет лавандой, а пудинг никто не тронул.':['The scarf smells of lavender, and nobody touched the pudding.','Der Schal riecht nach Lavendel, und den Pudding hat niemand angerührt.','La bufanda huele a lavanda y nadie tocó el pudín.'],
+ 'Вор не любит сладкое? Тогда откуда шоколад на ключе?':['The thief dislikes sweets? Then where did the chocolate on the wrench come from?','Der Dieb mag keine Süßigkeiten? Woher kommt dann die Schokolade am Schlüssel?','¿Al ladrón no le gustan los dulces? Entonces, ¿de dónde sale el chocolate de la llave?'],
+ 'Перо слишком большое для обычной птицы!':['The feather is too big for an ordinary bird!','Die Feder ist zu groß für einen gewöhnlichen Vogel!','¡La pluma es demasiado grande para un pájaro común!'],
+ 'А подзорная труба смотрит прямо на Кристальную луну.':['And the spyglass points straight at the Crystal Moon.','Und das Fernrohr zeigt direkt auf den Kristallmond.','Y el catalejo apunta directo a la Luna de Cristal.'],
+ 'На подушке вмятина: кто-то долго сидел и ждал.':['There is a dent in the pillow: someone sat here waiting for a long time.','Im Kissen ist eine Delle: Jemand hat hier lange gewartet.','La almohada tiene una hendidura: alguien esperó aquí mucho tiempo.'],
+ 'В корзинке перья и крошки пирога. Кто-то любит печь.':['The basket holds feathers and pie crumbs. Someone loves to bake.','Im Körbchen liegen Federn und Kuchenkrümel. Jemand backt gern.','La cesta tiene plumas y migas de tarta. A alguien le encanta hornear.'],
+ 'Ракушка шепчет: «Приходи на ужин…» Это приглашение?':['The shell whispers: "Come to dinner…" Is that an invitation?','Die Muschel flüstert: „Komm zum Abendessen…“ Ist das eine Einladung?','La caracola susurra: «Ven a cenar…» ¿Es una invitación?'],
+ 'Красный крестик на карте — снова Кристальная луна.':['The red cross on the map is the Crystal Moon again.','Das rote Kreuz auf der Karte ist wieder der Kristallmond.','La cruz roja del mapa es otra vez la Luna de Cristal.'],
+ 'Часы города встали в час ужина, а будильник ждёт «времени пирога».':['The city clocks stopped at dinner time, and the alarm waits for "pie time".','Die Stadtuhren blieben zur Abendbrotzeit stehen, und der Wecker wartet auf die „Kuchenzeit“.','Los relojes se pararon a la hora de cenar y el despertador espera la «hora de la tarta».'],
+ 'В ящике не хватает только звёздного ключа. Я близко!':['Only the star key is missing from the toolbox. I am close!','In der Kiste fehlt nur der Sternenschlüssel. Ich bin nah dran!','A la caja solo le falta la llave estelar. ¡Estoy cerca!'],
+ 'На прихватке вышита сова. Сова! Всё сходится…':['An owl is embroidered on the oven mitt. An owl! It all adds up…','Auf dem Topflappen ist eine Eule aufgestickt. Eine Eule! Alles passt zusammen…','La agarradera tiene un búho bordado. ¡Un búho! Todo encaja…'],
+ 'Остался последний шаг — Кристальная луна. Пора за ключом!':['One last step remains: the Crystal Moon. Time to get the key!','Ein letzter Schritt bleibt: der Kristallmond. Zeit, den Schlüssel zu holen!','Queda un último paso: la Luna de Cristal. ¡Hora de recuperar la llave!'],
+ '💌 Письмо от совы':['💌 A letter from the owl','💌 Ein Brief von der Eule','💌 Una carta del búho'],
+ 'Дорогой Зип!':['Dear Zip!','Lieber Zip!','¡Querido Zip!'],
+ 'Прости, что спрятала ключ. На Кристальной луне так тихо и одиноко,':['Sorry for hiding the key. It is so quiet and lonely on the Crystal Moon,','Verzeih, dass ich den Schlüssel versteckt habe. Auf dem Kristallmond ist es so still und einsam,','Perdona por esconder la llave. En la Luna de Cristal hay tanta quietud y soledad,'],
+ 'а мне так хотелось, чтобы ты остался на мой пирог.':['and I so wanted you to stay for my pie.','und ich wollte so gern, dass du zu meinem Kuchen bleibst.','y yo quería tanto que te quedaras a probar mi tarta.'],
+ 'Мой дом всегда открыт. Приходи в гости, когда захочешь!':['My home is always open. Visit whenever you like!','Mein Zuhause steht immer offen. Besuch mich, wann immer du magst!','Mi casa siempre está abierta. ¡Ven a visitarme cuando quieras!'],
+ '— Твоя сова 🦉':['— Your owl 🦉','— Deine Eule 🦉','— Tu búho 🦉'],
+ 'Нажми, чтобы продолжить':['Tap to continue','Tippen zum Fortfahren','Toca para continuar'],
+ 'Зип':['Zip','Zip','Zip'],
  '🔊 Звук':['🔊 Sound','🔊 Ton','🔊 Sonido'],
  '🎵 Музыка':['🎵 Music','🎵 Musik','🎵 Música'],
  '🔔 Звуки игры':['🔔 Sound effects','🔔 Effekte','🔔 Efectos'],
@@ -439,7 +465,7 @@ function startPlanet(i,retry){
   startMusic();
   state='intro';introT=2.4;
 }
-function newGame(){daily=false;got=PLANETS.map(()=>[false,false,false]);score=0;startPlanet(0);}
+function newGame(){daily=false;got=PLANETS.map(()=>[false,false,false]);score=0;score0=0;showStory(0,0,0);}
 let daily=false,DM=null,dailySeed=0,dd={last:'',streak:0,best:0};
 try{const d=JSON.parse(localStorage.getItem('zip-daily')||'null');if(d){dd.last=String(d.last||'');dd.streak=+d.streak||0;dd.best=+d.best||0;}}catch(e){}
 function saveDaily(){try{localStorage.setItem('zip-daily',JSON.stringify(dd));}catch(e){}}
@@ -484,10 +510,11 @@ function onTap(x,y,id){
   else if(state==='play'){if(x<W*.6)doJump();else{touchDuck=true;duckPtr=id;}}
   else if(state==='end'&&endInfo.daily){if(endInfo.ok||(x<150&&y<56))exitDaily();else startPlanet(pIdx,true);}
   else if(state==='end'){
-    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}stats.wins++;rec.runs.push({s:score,d:Date.now(),n:night?1:0,f:diff});rec.runs.sort((a,b)=>b.s-a.s);rec.runs=rec.runs.slice(0,10);saveMeta();checkAch();}else{pIdx++;score0=score;save();startPlanet(pIdx);}}
+    if(endInfo.ok){if(pIdx+1>=PLANETS.length){state='win';winPage=0;clearSave();sWin();stopMusic();wonOnce=true;try{localStorage.setItem('zip-won','1');}catch(e){}stats.wins++;rec.runs.push({s:score,d:Date.now(),n:night?1:0,f:diff});rec.runs.sort((a,b)=>b.s-a.s);rec.runs=rec.runs.slice(0,10);saveMeta();checkAch();}else{pIdx++;score0=score;save();showStory(pIdx,pIdx-1,pIdx);}}
     else startPlanet(pIdx,true);
   }else if(state==='dead'){if(daily&&x<150&&y<56)exitDaily();else startPlanet(pIdx,true);}
-  else if(state==='win'){state='menu';loadSave();stopMusic();}
+  else if(state==='story'){startPlanet(storyNext);}
+  else if(state==='win'){if(winPage===0)winPage=1;else{state='menu';loadSave();stopMusic();}}
   else if(state==='set'){
     if(x<150&&y<56){state='menu';saveVol();return;}
     for(let i=0;i<2;i++)if(Math.abs(y-sliderY(i))<26&&x>SL.x0-24&&x<SL.x1+24){dragS=i;setSlider(i,x);return;}
@@ -933,6 +960,28 @@ function drawJournal(){
   txt(d,W/2,408,13,'#ffe9b0','center','normal');
   txt(f('Улики: {0}/{1} · Реликвии: {2}/{3}',fa,TOTAL,book.r.filter(Boolean).length,PLANETS.length),W/2,434,13,'#9fe8ff');
 }
+const STRU=['Мой корабль не взлетит без звёздного ключа — его украли!','Надо найти вора. Начну с Мармеладии: там пахнет шоколадом.','На гаечном ключе — следы шоколада. Вор явно сладкоежка.','Крошки ведут на Грибной луг. Идём туда!','Гриб срезан аккуратно, а записка написана круглым почерком.','Вор вежливый и спокойный. Это очень странно…','Шарф пахнет лавандой, а пудинг никто не тронул.','Вор не любит сладкое? Тогда откуда шоколад на ключе?','Перо слишком большое для обычной птицы!','А подзорная труба смотрит прямо на Кристальную луну.','На подушке вмятина: кто-то долго сидел и ждал.','В корзинке перья и крошки пирога. Кто-то любит печь.','Ракушка шепчет: «Приходи на ужин…» Это приглашение?','Красный крестик на карте — снова Кристальная луна.','Часы города встали в час ужина, а будильник ждёт «времени пирога».','В ящике не хватает только звёздного ключа. Я близко!','На прихватке вышита сова. Сова! Всё сходится…','Остался последний шаг — Кристальная луна. Пора за ключом!'];
+const STORY=[[0,1],[2,3],[4,5],[6,7],[8,9],[10,11],[12,13],[14,15],[16,17]];
+let storyI=0,storyBG=0,storyNext=0,winPage=0;
+function showStory(i,bg,next){storyI=i;storyBG=bg;storyNext=next;state='story';}
+function txtFit(t,x,y,maxW,size,col,al,wt){let z=size;ctx.font=(wt||'bold')+' '+z+'px system-ui,sans-serif';while(z>11&&ctx.measureText(t).width>maxW){z--;ctx.font=(wt||'bold')+' '+z+'px system-ui,sans-serif';}txt(t,x,y,z,col,al,wt);}
+function wrapDraw(t,x,y,maxW,size,col){
+  ctx.font='normal '+size+'px system-ui,sans-serif';const ws=t.split(' ');let line='',ls=[];
+  for(const w of ws){const c=line?line+' '+w:w;if(ctx.measureText(c).width>maxW&&line){ls.push(line);line=w;}else line=c;}
+  if(line)ls.push(line);ls.forEach((l,i)=>txt(l,x,y+i*26,size,col,'center','normal'));return y+ls.length*26;
+}
+function drawStory(){
+  drawBG(PLANETS[storyBG]);ctx.fillStyle='rgba(10,5,30,.5)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(0,GY,W,H-GY);
+  drawAlien(140,GY,false,0,time*2);
+  panel(250,110,530,170,22,'rgba(40,20,80,.92)');
+  ctx.fillStyle='rgba(40,20,80,.92)';ctx.beginPath();ctx.moveTo(262,225);ctx.lineTo(214,262);ctx.lineTo(300,262);ctx.closePath();ctx.fill();
+  panel(270,96,110,30,15,'#ffcf4a');txt('👽 '+tr('Зип'),325,111,15,'#3a2060');
+  const b=STORY[storyI]||STORY[0];
+  let yy=wrapDraw(tr(STRU[b[0]]),515,156,480,19,'#fff');
+  wrapDraw(tr(STRU[b[1]]),515,yy+14,480,19,'#ffe9b0');
+  txt(tr('Нажми, чтобы продолжить'),W/2,H-24,13,'rgba(255,255,255,.7)','center','normal');
+}
 let dragS=null;
 const SL={x0:250,x1:550};
 function sliderY(i){return 175+i*85;}
@@ -1024,18 +1073,30 @@ function draw(){
     return;
   }
   if(state==='journal'){pIdx=0;drawJournal();return;}
+  if(state==='story'){drawStory();return;}
   if(state==='ach'){pIdx=0;drawAch();return;}
   if(state==='set'){pIdx=0;drawSet();return;}
   if(state==='rec'){pIdx=0;drawRec();return;}
   if(state==='win'){
     drawHome();
+    if(winPage===1){
+      panel(60,14,680,236,24,'rgba(40,20,80,.9)');
+      txt(tr('💌 Письмо от совы'),W/2,46,28,'#ffe66b');
+      txt(tr('Дорогой Зип!'),W/2,88,18,'#fff');
+      txtFit(tr('Прости, что спрятала ключ. На Кристальной луне так тихо и одиноко,'),W/2,120,640,16,'#fff','center','normal');
+      txtFit(tr('а мне так хотелось, чтобы ты остался на мой пирог.'),W/2,146,640,16,'#fff','center','normal');
+      txtFit(tr('Мой дом всегда открыт. Приходи в гости, когда захочешь!'),W/2,172,640,16,'#fff','center','normal');
+      txt(tr('— Твоя сова 🦉'),W/2,204,17,'#ffe9b0');
+      txtFit(tr('🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться'),W/2,234,640,13,'#ffe9b0','center','normal');
+      return;
+    }
     panel(60,14,680,206,24,'rgba(40,20,80,.9)');
     txt(tr('Тайна раскрыта! 🏡'),W/2,48,30,'#ffe66b');
     txt(tr('Это была сова-хранительница. Она спрятала ключ,'),W/2,88,16,'#fff','center','normal');
     txt(tr('потому что не хотела, чтобы Зип улетал, не попробовав её пирог.'),W/2,112,16,'#fff','center','normal');
     txt(tr('Зип остался на ужин — а потом вернулся домой. Тепло и тихо.'),W/2,136,16,'#fff','center','normal');
     txt(f('Улики {0}/{1} · Реликвии {2}/{3} · Наряды {4}/{5}',totalGot(),TOTAL,book.r.filter(Boolean).length,PLANETS.length,ward.u.length,OUT.length),W/2,168,15,'#9fe8ff');
-    txt(tr('🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться'),W/2,198,13,'#ffe9b0','center','normal');
+    txt(tr('Нажми, чтобы продолжить'),W/2,198,13,'#ffe9b0','center','normal');
     return;
   }
   drawBG(pl);
@@ -1087,7 +1148,7 @@ function frame(ts){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__dbg={startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
+window.__dbg={get winPage(){return winPage;},get storyI(){return storyI;},startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});}</script>
