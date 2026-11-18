@@ -1,5 +1,5 @@
 // Офлайн-кэш. При обновлении игры увеличьте номер версии (v1 -> v2).
-const CACHE = 'zip-v7';
+const CACHE = 'zip-v8';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
