@@ -1,5 +1,5 @@
-// Офлайн-кэш. При обновлении игры увеличьте номер версии (v1 -> v2).
-const CACHE = 'zip-v13';
+// Офлайн-кэш. Сначала сеть (чтобы обновления приходили сразу), если нет интернета — кэш.
+const CACHE = 'zip-v14';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -10,10 +10,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
-      const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copy));
+    fetch(e.request, {cache: 'no-cache'}).then(res => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
       return res;
-    }).catch(() => caches.match('index.html')))
+    }).catch(() => caches.match(e.request).then(r => r || caches.match('index.html')))
   );
 });
