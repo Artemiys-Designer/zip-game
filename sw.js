@@ -1,5 +1,5 @@
 // Офлайн-кэш. Сначала сеть (чтобы обновления приходили сразу), если нет интернета — кэш.
-const CACHE = 'zip-v14';
+const CACHE = 'zip-v15';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

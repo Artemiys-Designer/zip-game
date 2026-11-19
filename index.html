@@ -108,14 +108,14 @@ const LANGS=['ru','en','de','es'],LNAME={ru:'Русский',en:'English',de:'De
 let LANG='ru';
 try{const l=localStorage.getItem('zip-lang');if(LANGS.includes(l))LANG=l;else{const n=((navigator.language||'en')+'').slice(0,2).toLowerCase();LANG=LANGS.includes(n)?n:'en';}}catch(e){}
 const TR={
- 'Мой корабль не взлетит без звёздного ключа — его украли!':['My ship cannot take off without the star key. Someone stole it!','Mein Raumschiff startet nicht ohne den Sternenschlüssel. Er wurde gestohlen!','¡Mi nave no despega sin la llave estelar. Alguien la robó!'],
- 'Надо найти вора. Начну с Мармеладии: там пахнет шоколадом.':['I must find the thief. I will start on Marmeladia: it smells of chocolate.','Ich muss den Dieb finden. Ich beginne auf Marmeladia: Es riecht nach Schokolade.','Debo encontrar al ladrón. Empezaré en Mermeladia: huele a chocolate.'],
+ 'Мой корабль не взлетит без звёздного ключа — его украли!':['My ship can\'t take off without the star key. Someone stole it!','Mein Raumschiff startet nicht ohne den Sternenschlüssel. Er wurde gestohlen!','¡Mi nave no despega sin la llave estelar: alguien la robó!'],
+ 'Надо найти вора. Начну с Мармеладии: там пахнет шоколадом.':['I must find the thief. I\'ll start on Marmeladia: it smells of chocolate.','Ich muss den Dieb finden. Ich beginne auf Marmeladia: Es riecht nach Schokolade.','Debo encontrar al ladrón. Empezaré en Mermeladia: huele a chocolate.'],
  'На гаечном ключе — следы шоколада. Вор явно сладкоежка.':['There is chocolate on the wrench. The thief clearly has a sweet tooth.','Am Schraubenschlüssel klebt Schokolade. Der Dieb ist offenbar eine Naschkatze.','Hay chocolate en la llave inglesa. El ladrón es claramente un goloso.'],
- 'Крошки ведут на Грибной луг. Идём туда!':['The crumbs lead to Mushroom Meadow. Let us go there!','Die Krümel führen zur Pilzwiese. Gehen wir hin!','Las migas llevan al Prado de Setas. ¡Vamos allí!'],
+ 'Крошки ведут на Грибной луг. Идём туда!':['The crumbs lead to Mushroom Meadow. Let\'s go there!','Die Krümel führen zur Pilzwiese. Gehen wir hin!','Las migas llevan al Prado de Setas. ¡Vamos allí!'],
  'Гриб срезан аккуратно, а записка написана круглым почерком.':['The mushroom was cut neatly, and the note is in round handwriting.','Der Pilz wurde sauber abgeschnitten, und die Notiz hat eine runde Handschrift.','La seta se cortó con cuidado y la nota tiene letra redondeada.'],
  'Вор вежливый и спокойный. Это очень странно…':['The thief is polite and calm. How very strange…','Der Dieb ist höflich und ruhig. Wie seltsam…','El ladrón es educado y tranquilo. Qué extraño…'],
  'Шарф пахнет лавандой, а пудинг никто не тронул.':['The scarf smells of lavender, and nobody touched the pudding.','Der Schal riecht nach Lavendel, und den Pudding hat niemand angerührt.','La bufanda huele a lavanda y nadie tocó el pudín.'],
- 'Вор не любит сладкое? Тогда откуда шоколад на ключе?':['The thief dislikes sweets? Then where did the chocolate on the wrench come from?','Der Dieb mag keine Süßigkeiten? Woher kommt dann die Schokolade am Schlüssel?','¿Al ladrón no le gustan los dulces? Entonces, ¿de dónde sale el chocolate de la llave?'],
+ 'Вор не любит сладкое? Тогда откуда шоколад на ключе?':['The thief dislikes sweets? Then where did the chocolate on the wrench come from?','Der Dieb mag keine Süßigkeiten? Woher kommt dann die Schokolade am Schraubenschlüssel?','¿Al ladrón no le gustan los dulces? Entonces, ¿de dónde sale el chocolate de la llave inglesa?'],
  'Перо слишком большое для обычной птицы!':['The feather is too big for an ordinary bird!','Die Feder ist zu groß für einen gewöhnlichen Vogel!','¡La pluma es demasiado grande para un pájaro común!'],
  'А подзорная труба смотрит прямо на Кристальную луну.':['And the spyglass points straight at the Crystal Moon.','Und das Fernrohr zeigt direkt auf den Kristallmond.','Y el catalejo apunta directo a la Luna de Cristal.'],
  'На подушке вмятина: кто-то долго сидел и ждал.':['There is a dent in the pillow: someone sat here waiting for a long time.','Im Kissen ist eine Delle: Jemand hat hier lange gewartet.','La almohada tiene una hendidura: alguien esperó aquí mucho tiempo.'],
@@ -123,13 +123,13 @@ const TR={
  'Ракушка шепчет: «Приходи на ужин…» Это приглашение?':['The shell whispers: "Come to dinner…" Is that an invitation?','Die Muschel flüstert: „Komm zum Abendessen…“ Ist das eine Einladung?','La caracola susurra: «Ven a cenar…» ¿Es una invitación?'],
  'Красный крестик на карте — снова Кристальная луна.':['The red cross on the map is the Crystal Moon again.','Das rote Kreuz auf der Karte ist wieder der Kristallmond.','La cruz roja del mapa es otra vez la Luna de Cristal.'],
  'Часы города встали в час ужина, а будильник ждёт «времени пирога».':['The city clocks stopped at dinner time, and the alarm waits for "pie time".','Die Stadtuhren blieben zur Abendbrotzeit stehen, und der Wecker wartet auf die „Kuchenzeit“.','Los relojes se pararon a la hora de cenar y el despertador espera la «hora de la tarta».'],
- 'В ящике не хватает только звёздного ключа. Я близко!':['Only the star key is missing from the toolbox. I am close!','In der Kiste fehlt nur der Sternenschlüssel. Ich bin nah dran!','A la caja solo le falta la llave estelar. ¡Estoy cerca!'],
+ 'В ящике не хватает только звёздного ключа. Я близко!':['Only the star key is missing from the toolbox. I\'m close!','In der Kiste fehlt nur der Sternenschlüssel. Ich bin nah dran!','A la caja solo le falta la llave estelar. ¡Estoy cerca!'],
  'На прихватке вышита сова. Сова! Всё сходится…':['An owl is embroidered on the oven mitt. An owl! It all adds up…','Auf dem Topflappen ist eine Eule aufgestickt. Eine Eule! Alles passt zusammen…','La agarradera tiene un búho bordado. ¡Un búho! Todo encaja…'],
  'Остался последний шаг — Кристальная луна. Пора за ключом!':['One last step remains: the Crystal Moon. Time to get the key!','Ein letzter Schritt bleibt: der Kristallmond. Zeit, den Schlüssel zu holen!','Queda un último paso: la Luna de Cristal. ¡Hora de recuperar la llave!'],
  '💌 Письмо от совы':['💌 A letter from the owl','💌 Ein Brief von der Eule','💌 Una carta del búho'],
  'Дорогой Зип!':['Dear Zip!','Lieber Zip!','¡Querido Zip!'],
- 'Прости, что спрятала ключ. На Кристальной луне так тихо и одиноко,':['Sorry for hiding the key. It is so quiet and lonely on the Crystal Moon,','Verzeih, dass ich den Schlüssel versteckt habe. Auf dem Kristallmond ist es so still und einsam,','Perdona por esconder la llave. En la Luna de Cristal hay tanta quietud y soledad,'],
- 'а мне так хотелось, чтобы ты остался на мой пирог.':['and I so wanted you to stay for my pie.','und ich wollte so gern, dass du zu meinem Kuchen bleibst.','y yo quería tanto que te quedaras a probar mi tarta.'],
+ 'Прости, что спрятала ключ. На Кристальной луне так тихо и одиноко,':['Sorry for hiding the key. It\'s so quiet and lonely on the Crystal Moon,','Verzeih, dass ich den Schlüssel versteckt habe. Auf dem Kristallmond ist es so still und einsam,','Perdona por esconder la llave. En la Luna de Cristal hay tanta quietud y soledad,'],
+ 'а мне так хотелось, чтобы ты остался на мой пирог.':['and I so wanted you to stay for my pie.','und ich wollte so gern, dass du auf ein Stück Kuchen bleibst.','y yo quería tanto que te quedaras a probar mi tarta.'],
  'Мой дом всегда открыт. Приходи в гости, когда захочешь!':['My home is always open. Visit whenever you like!','Mein Zuhause steht immer offen. Besuch mich, wann immer du magst!','Mi casa siempre está abierta. ¡Ven a visitarme cuando quieras!'],
  '— Твоя сова 🦉':['— Your owl 🦉','— Deine Eule 🦉','— Tu búho 🦉'],
  'Нажми, чтобы продолжить':['Tap to continue','Tippen zum Fortfahren','Toca para continuar'],
@@ -214,7 +214,7 @@ const TR={
  'Лунный кристалл':['Moon crystal','Mondkristall','Cristal lunar'],
  'Внутри мерцает чей-то силуэт с ушками.':['Inside shimmers a silhouette with little ears.','Darin schimmert eine Silhouette mit kleinen Ohren.','Dentro brilla una silueta con orejitas.'],
  'Статуэтка совы':['Owl statuette','Eulenfigur','Estatuilla de búho'],
- 'Сова-хранительница! Так вот кто вор…':['The guardian owl! So that\'s the thief…','Die Hüter-Eule! Also war sie der Dieb…','¡El búho guardián! Así que era el ladrón…'],
+ 'Сова-хранительница! Так вот кто вор…':['The guardian owl! So that\'s the thief…','Die Wächter-Eule! Also ist sie die Diebin…','¡El búho guardián! Así que era el ladrón…'],
  'Звёздный ключ':['Star key','Sternenschlüssel','Llave estelar'],
  'Он здесь! Корабль снова может лететь.':['It\'s here! The ship can fly again.','Er ist hier! Das Raumschiff kann wieder fliegen.','¡Está aquí! La nave puede volver a volar.'],
  'Собери 40 сладостей':['Collect 40 sweets','Sammle 40 Süßigkeiten','Recoge 40 dulces'],
@@ -236,7 +236,7 @@ const TR={
  'Осколок радуги':['Rainbow shard','Regenbogensplitter','Fragmento de arcoíris'],
  'Тёплый на ощупь, переливается всеми цветами.':['Warm to the touch, shimmering in every colour.','Warm anzufassen, schimmert in allen Farben.','Tibio al tacto, brilla con todos los colores.'],
  'Светящийся кальмар':['Glowing squid','Leuchtkalmar','Calamar luminoso'],
- 'Подмигнул и уплыл, оставив след из света.':['It winked and swam away, leaving a trail of light.','Er zwinkerte und schwamm davon, eine Lichtspur hinterlassend.','Guiñó un ojo y se fue nadando, dejando un rastro de luz.'],
+ 'Подмигнул и уплыл, оставив след из света.':['It winked and swam away, leaving a trail of light.','Er zwinkerte und schwamm davon und hinterließ eine Lichtspur.','Guiñó un ojo y se fue nadando, dejando un rastro de luz.'],
  'Карманные часы':['Pocket watch','Taschenuhr','Reloj de bolsillo'],
  'Стрелки идут назад. Время пирога близко.':['The hands run backwards. Pie time is near.','Die Zeiger laufen rückwärts. Die Kuchenzeit naht.','Las agujas van hacia atrás. La hora de la tarta se acerca.'],
  'Вечный уголёк':['Eternal ember','Ewige Glut','Brasa eterna'],
@@ -245,10 +245,10 @@ const TR={
  'Играет колыбельную совы — грустную и нежную.':['It plays the owl\'s lullaby: sad and gentle.','Sie spielt das Schlaflied der Eule: traurig und zart.','Toca la nana del búho: triste y suave.'],
  'Сыщик':['Detective','Detektiv','Detective'],
  'Кондитер':['Pastry chef','Konditor','Pastelero'],
- 'Грибник':['Mushroomer','Pilzsammler','Setero'],
+ 'Грибник':['Mushroom picker','Pilzsammler','Setero'],
  'Полярник':['Polar explorer','Polarforscher','Explorador polar'],
  'Путник':['Traveller','Wanderer','Viajero'],
- 'Звездочёт':['Stargazer','Sterndeuter','Astrónomo'],
+ 'Звездочёт':['Stargazer','Sterngucker','Astrónomo'],
  'Лётчик':['Pilot','Pilot','Piloto'],
  'Ныряльщик':['Diver','Taucher','Buzo'],
  'Механик':['Mechanic','Mechaniker','Mecánico'],
@@ -326,8 +326,8 @@ const TR={
  'выкл':['off','aus','no'],
  'Наряд: {0} · нажми на Зипа ({1}/{2})':['Outfit: {0} · tap Zip ({1}/{2})','Outfit: {0} · tippe auf Zip ({1}/{2})','Traje: {0} · toca a Zip ({1}/{2})'],
  'Тайна раскрыта! 🏡':['Mystery solved! 🏡','Geheimnis gelüftet! 🏡','¡Misterio resuelto! 🏡'],
- 'Это была сова-хранительница. Она спрятала ключ,':['It was the guardian owl. She hid the key','Es war die Hüter-Eule. Sie hat den Schlüssel versteckt,','Fue el búho guardián. Escondió la llave'],
- 'потому что не хотела, чтобы Зип улетал, не попробовав её пирог.':['because she did not want Zip to leave without trying her pie.','weil sie nicht wollte, dass Zip geht, ohne ihren Kuchen zu probieren.','porque no quería que Zip se fuera sin probar su tarta.'],
+ 'Это была сова-хранительница. Она спрятала ключ,':['It was the guardian owl. She hid the key','Es war die Wächter-Eule. Sie hat den Schlüssel versteckt,','Fue el búho guardián. Escondió la llave'],
+ 'потому что не хотела, чтобы Зип улетал, не попробовав её пирог.':['because she didn\'t want Zip to leave without trying her pie.','weil sie nicht wollte, dass Zip geht, ohne ihren Kuchen zu probieren.','porque no quería que Zip se fuera sin probar su tarta.'],
  'Зип остался на ужин — а потом вернулся домой. Тепло и тихо.':['Zip stayed for dinner, and then flew home. Warm and quiet.','Zip blieb zum Abendessen und flog dann nach Hause. Warm und still.','Zip se quedó a cenar y luego volvió a casa. Cálido y tranquilo.'],
  'Улики {0}/{1} · Реликвии {2}/{3} · Наряды {4}/{5}':['Clues {0}/{1} · Relics {2}/{3} · Outfits {4}/{5}','Hinweise {0}/{1} · Relikte {2}/{3} · Outfits {4}/{5}','Pistas {0}/{1} · Reliquias {2}/{3} · Trajes {4}/{5}'],
  '🌙 Открыт ночной режим — включи его в меню · Нажми, чтобы вернуться':['🌙 Night mode unlocked: switch it on in the menu · Tap to return','🌙 Nachtmodus freigeschaltet: im Menü aktivieren · Tippen zum Zurückkehren','🌙 Modo nocturno desbloqueado: actívalo en el menú · Toca para volver'],
@@ -344,7 +344,7 @@ const TR={
  '🏅 Миссия выполнена (реликвия уже в дневнике)':['🏅 Mission complete (relic already in the journal)','🏅 Mission erfüllt (Relikt schon im Tagebuch)','🏅 Misión cumplida (la reliquia ya está en el diario)'],
  '🎯 Миссия не выполнена: {0}':['🎯 Mission not complete: {0}','🎯 Mission nicht erfüllt: {0}','🎯 Misión sin cumplir: {0}'],
  'Планета пройдена! ✨':['Planet complete! ✨','Planet geschafft! ✨','¡Planeta completado! ✨'],
- 'Все артефакты здесь собраны.':['All artifacts here are collected.','Alle Artefakte hier sind gesammelt.','Todos los artefactos de aquí están reunidos.'],
+ 'Все артефакты здесь собраны.':['You\'ve collected all the artifacts here.','Alle Artefakte hier sind gesammelt.','Todos los artefactos de aquí están reunidos.'],
  'Новый наряд для Зипа: «{0}»! 🎉':['New outfit for Zip: "{0}"! 🎉','Neues Outfit für Zip: „{0}“! 🎉','¡Nuevo traje para Zip: «{0}»! 🎉'],
  'Портал открывается — летим дальше.':['The portal opens: onward!','Das Portal öffnet sich: weiter geht\'s.','El portal se abre: ¡adelante!'],
  'Бонус +{0} · Счёт: {1}':['Bonus +{0} · Score: {1}','Bonus +{0} · Punkte: {1}','Bonus +{0} · Puntos: {1}'],
@@ -352,7 +352,7 @@ const TR={
  'Нажми — следующая планета':['Tap for the next planet','Tippen: nächster Planet','Toca: siguiente planeta'],
  'Портал закрыт':['Portal closed','Portal geschlossen','Portal cerrado'],
  'Не хватает артефактов: {0}.':['Artifacts missing: {0}.','Es fehlen Artefakte: {0}.','Faltan artefactos: {0}.'],
- 'Они всё ещё лежат на планете — вернись и найди.':['They are still lying on the planet: go back and find them.','Sie liegen noch auf dem Planeten: Kehre zurück und finde sie.','Siguen en el planeta: vuelve y encuéntralos.'],
+ 'Они всё ещё лежат на планете — вернись и найди.':['They\'re still lying on the planet: go back and find them.','Sie liegen noch auf dem Planeten: Kehre zurück und finde sie.','Siguen en el planeta: vuelve y encuéntralos.'],
  'Нажми, чтобы попробовать снова':['Tap to try again','Tippen für einen neuen Versuch','Toca para intentarlo de nuevo']
 ,
  'Мини-игра':['Mini-game','Minispiel','Minijuego'],
@@ -1174,7 +1174,7 @@ function drawMini(){
   if(!mini.done){panel(630,10,160,34,17,'rgba(255,255,255,.2)');txt(tr('Пропустить')+' ›',710,27,14,'#fff');}
   if(mini.shake>0)mini.shake-=.016;
   if(mini.type==='diff'){
-    txt(tr('Найди 3 отличия'),W/2,30,24,'#fff');
+    txtFit(tr('Найди 3 отличия'),W/2+10,30,340,24,'#fff');
     const sh=mini.shake>0?Math.sin(time*80)*4:0;
     [DIFFB.x,DIFFB.gx].forEach((px,pi)=>{
       ctx.save();ctx.translate(pi?sh:0,0);panel(px,DIFFB.y,DIFFB.w,DIFFB.h,20,'rgba(60,40,110,.85)');ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=3;rr(px,DIFFB.y,DIFFB.w,DIFFB.h,20);ctx.stroke();
@@ -1186,7 +1186,7 @@ function drawMini(){
     txt(f('Найдено: {0}/3',mini.found),W/2,372,22,'#ffe66b');
     for(let i=0;i<3;i++)txt(i<mini.found?'⭐':'☆',W/2-40+i*40,410,28,i<mini.found?'#ffe66b':'#fff');
   }else{
-    txt(tr('Собери артефакт'),W/2,30,24,'#fff');
+    txtFit(tr('Собери артефакт'),W/2+10,30,340,24,'#fff');
     const bx=256,by=76,ts=96;
     for(let c=0;c<9;c++){
       const t=mini.perm[c],dx=bx+(c%3)*ts,dy=by+Math.floor(c/3)*ts,sx=(t%3)*ts,sy=Math.floor(t/3)*ts,sel=mini.sel===c;
@@ -1398,14 +1398,23 @@ function draw(){
 }
 
 let last=0;
+let RK=1,RCAP=2,slowN=0;
+function fitRes(dt){
+  // чёткая картинка на экранах высокой плотности; на слабых устройствах разрешение само снижается
+  if(dt>.026){if(++slowN>90&&RCAP>1){RCAP=Math.max(1,RCAP-.25);slowN=0;}}else if(slowN>0)slowN--;
+  const r=cv.getBoundingClientRect(),k=Math.min(window.__RKMAX||RCAP,Math.max(1,(r.width||W)*(window.devicePixelRatio||1)/W));
+  const kk=Math.round(k*4)/4;
+  if(kk!==RK||cv.width!==Math.round(W*kk)){RK=kk;cv.width=Math.round(W*kk);cv.height=Math.round(H*kk);}
+  ctx.setTransform(RK,0,0,RK,0,0);
+}
 function frame(ts){
   const dt=Math.min(.033,(ts-last)/1000||.016);last=ts;
-  update(dt);draw();drawAToast();
+  fitRes(dt);update(dt);draw();drawAToast();
   if(ac&&musicOn){const mk=musKind();if(!mus&&mk==='menu')startMusic();else if(mus&&mus.k==='menu'&&mk!=='menu')stopMusic();}
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__dbg={startMini,get mini(){return mini;},get ward(){return ward;},get mus(){return mus;},get winPage(){return winPage;},get storyI(){return storyI;},startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
+window.__dbg={startMini,get mini(){return mini;},get ward(){return ward;},get mus(){return mus;},get winPage(){return winPage;},get storyI(){return storyI;},startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},set dist(v){dist=v;},get LEN(){return LEN;},get endInfo(){return endInfo;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});}</script>
