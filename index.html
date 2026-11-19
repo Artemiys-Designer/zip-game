@@ -22,6 +22,8 @@ canvas{width:min(100vw,calc(100vh*16/9));height:auto;aspect-ratio:16/9;display:b
 </head>
 <body>
 <div id="rot">📱↻<br><br><span id="rott">Поверните телефон горизонтально</span></div>
+<script>(function(){var T={ru:'Поверните телефон горизонтально',en:'Please rotate your phone to landscape',de:'Bitte drehe dein Handy ins Querformat',es:'Gira el teléfono en horizontal'},l='en';try{var s=localStorage.getItem('zip-lang');if(T[s])l=s;else{var n=((navigator.language||'en')+'').slice(0,2).toLowerCase();if(T[n])l=n;}}catch(e){}document.getElementById('rott').textContent=T[l];})();</script>
+<canvas id="c" width="800" height="450"></canvas>
 <script>
 (()=>{
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -1406,5 +1408,6 @@ requestAnimationFrame(frame);
 window.__dbg={startMini,get mini(){return mini;},get ward(){return ward;},get mus(){return mus;},get winPage(){return winPage;},get storyI(){return storyI;},startDaily,get daily(){return daily;},get dd(){return dd;},get DM(){return DM;},exitDaily,set diff(v){diff=v;},get diff(){return diff;},get speedNow(){return speed;},get stats(){return stats;},get achU(){return achU;},get rec(){return rec;},get score(){return score;},get ward(){return ward;},go(st){state=st;},get objs(){return objs;},get dist(){return dist;},get state(){return state;},tap:onTap,jump:doJump,get P(){return P;},get got(){return got;},update,draw};
 })();
 </script>
+<script>if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});}</script>
 </body>
 </html>
